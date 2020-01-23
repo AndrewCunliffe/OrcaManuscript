@@ -99,10 +99,10 @@ library(rgeos)                                                                  
     # Calculate spatially normalised values for photosynthetic tissue
     dataset$leaf_biomass <- dataset$Comp2_Mass / dataset$plot_area_from_field_length  # Leaves.
     dataset$herbacious_biomass <- dataset$Comp3_Mass / dataset$plot_area_from_field_length  # Herbacious
-    dataset$photosynthetic_biomass <- dataset$leaf_biomass + dataset$herbacious_biomass 
+    dataset$phytomass <- dataset$leaf_biomass + dataset$herbacious_biomass 
     
         
-  # Create long form dataset for plotting canopy heights
+  # Create long form dataset for plotting canopy heights in SI
     PlotID <- rep(dataset$PlotID, times = 2)
     method <- rep(c('SfM', 'Point Framing'), each = 36)
     min <- c(dataset$HAG_plotmin_of_cellmax_m, dataset$PF_HAG_min)
@@ -113,8 +113,7 @@ library(rgeos)                                                                  
     dataset_long <- data.frame(PlotID, method, min, lower, median, upper, max)  # Create vectors into new dataframe
     rm(PlotID, method, min, lower, median, upper, max)
 
-  
-          
+
 ### Data Analysis ----
 
   ### Analysis of canopy heights ####
@@ -128,8 +127,10 @@ library(rgeos)                                                                  
     ccc.test$rho.c  # The concordance correlation coefficient
     
     # Fit model
-    model_heights <- lm(dataset$HAG_plotmean_of_cellmax_m ~ dataset$PF_HAG_mean)
-    summary(model_heights)
+    model_heights_pow <- nls(HAG_plotmean_of_cellmax_m ~ a*PF_HAG_mean^b, data = dataset,
+                             start = list(a =1, b =1), na.action=na.exclude)
+    summary(model_heights_pow)
+    
     
     # Summarise bias
     HAG_rediduals <- dataset$HAG_plotmean_of_cellmax_m - dataset$PF_HAG_mean
@@ -164,29 +165,28 @@ library(rgeos)                                                                  
     
     
   ### Analysis of NDVI relationships ####
-    # Fitting (linear) models
+   # Fitting (linear) models
     model_NDVI_018_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_018)
     model_NDVI_047_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_047)
     model_NDVI_119_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_119)
     model_NDVI_121_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_121)
-    summary(model_NDVI_018_total)
-    summary(model_NDVI_047_total)
-    summary(model_NDVI_119_total)
-    summary(model_NDVI_121_total)
-    
-    model_NDVI_018_photo <- lm(dataset$photosynthetic_biomass ~ dataset$mean_NDVI_018)
-    model_NDVI_047_photo <- lm(dataset$photosynthetic_biomass ~ dataset$mean_NDVI_047)
-    model_NDVI_119_photo <- lm(dataset$photosynthetic_biomass ~ dataset$mean_NDVI_119)
-    model_NDVI_121_photo <- lm(dataset$photosynthetic_biomass ~ dataset$mean_NDVI_121)
-    summary(model_NDVI_018_photo)
-    summary(model_NDVI_047_photo)
-    summary(model_NDVI_119_photo)
-    summary(model_NDVI_121_photo)
-    
+    model_NDVI_018_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_018)
+    model_NDVI_047_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_047)
+    model_NDVI_119_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_119)
+    model_NDVI_121_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_121)
     model_NDVI_018_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_018)
     model_NDVI_047_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_047)
     model_NDVI_119_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_119)
     model_NDVI_121_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_121)
+    
+    summary(model_NDVI_018_total)
+    summary(model_NDVI_047_total)
+    summary(model_NDVI_119_total)
+    summary(model_NDVI_121_total)
+    summary(model_NDVI_018_photo)
+    summary(model_NDVI_047_photo)
+    summary(model_NDVI_119_photo)
+    summary(model_NDVI_121_photo)
     summary(model_NDVI_018_leaf)
     summary(model_NDVI_047_leaf)
     summary(model_NDVI_119_leaf)
@@ -194,7 +194,51 @@ library(rgeos)                                                                  
     
 
 
-    # Developing non-linar models
+    # Exp models
+
+    exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=0.5, b=0.5), na.action=na.exclude)
+
+    
+    
+    
+        exp_model_total_NDVI_047 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_total_NDVI_119 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    
+    
+    exp_model_photo_NDVI_018 <- nls(phytomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_photo_NDVI_047 <- nls(phytomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_photo_NDVI_119 <- nls(phytomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_photo_NDVI_121 <- nls(phytomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    
+    exp_model_leaf_NDVI_018 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_leaf_NDVI_047 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_leaf_NDVI_119 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    exp_model_leaf_NDVI_121 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    
+    
+    
+    
+
+    exp_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
+    pow_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*mean_NDVI_121^b, data=dataset, start = list(a=10.1, b=10.1), na.action=na.exclude)
+    
+    
+    model_NDVI_047_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_047)
+    model_NDVI_119_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_119)
+    model_NDVI_121_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_121)
+    model_NDVI_018_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_018)
+    model_NDVI_047_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_047)
+    model_NDVI_119_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_119)
+    model_NDVI_121_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_121)
+    model_NDVI_018_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_018)
+    model_NDVI_047_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_047)
+    model_NDVI_119_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_119)
+    model_NDVI_121_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_121)
+    
+    
+  # Developing non-linar models
     PowModel_Biomass_NDVI_047 <- nls(leaf_biomass ~ a*mean_NDVI_047^b, data = dataset,
                                      start = list(a =1, b =1), na.action=na.exclude)
     summary(PowModel_Biomass_NDVI_047)
@@ -242,6 +286,16 @@ library(rgeos)                                                                  
     test_exp
     
     
+  ##############################################
+  # DEVELOPMENT ####
+  # Test the influence of moss NDVI relationships?
+  #
+  # Q: What is the proportion of points sampled in each plot that culminate in moss?
+  #
+  # Q: What is the proprotion of points sampled in each plot where the first hit is moss?
+  #  
+    
+    
     
 # Visualisation ----
 # Plotting themes ----
@@ -266,7 +320,7 @@ max_hag <- 1.1*max(max(dataset$HAG_plotmax_of_cellmax_m, na.rm = TRUE), max(data
 max_mean_hag <- 1.1*max(max(dataset$HAG_plotmean_of_cellmax_m, na.rm = TRUE), max(dataset$PF_HAG_mean))
 max_ndvi <- 0.91
 min_ndvi <- 0.6
-photo_biomass_max <- 1.12*max(dataset$photosynthetic_biomass)
+photo_biomass_max <- 1.12*max(dataset$phytomass)
 spacing <- 2
 
 
@@ -291,8 +345,22 @@ spacing <- 2
               geom_smooth(method="lm", formula= y ~ x, se=FALSE, size=0.5, na.rm = TRUE))
 
 
+(Canopy_heights_plot <- ggplot(data = dataset,
+                               aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
+    geom_point(shape = 1) +
+    labs(x = "Point Frame - Canopy Height (m)",
+         y = "SfM - Canopy height (m)") +
+    theme_coding() +
+    coord_cartesian(ylim = c(0, 1), xlim = c(0, 1), expand=FALSE) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
+    stat_function(fun = function(x) (coef(summary(model_heights_pow))[, "Estimate"])[1]*(x)^(coef(summary(model_heights_pow))[, "Estimate"])[2],
+                  aes(), size = 1, lty = "solid", colour="Black") +
+    annotate("text", x = 0.8, y = 0.1, label = "italic(Y)==1.085~italic(X)^0.715", parse = TRUE,
+             color = "black", size = 4, family = "serif")
+  )
+
 # Export plot
-  png(filename = "plots/Figure 2 - Canopy Heights.png", width = 10, height = 10, units = "cm", res = 400)
+  png(filename = "plots/Figure 2 - Canopy Heights2.png", width = 10, height = 10, units = "cm", res = 400)
   plot(Canopy_heights_plot)
   dev.off()
 
@@ -398,7 +466,7 @@ spacing <- 2
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
   # Photosynthetic biomass
-  NDVI_vs_photo_biomass_121 <- ggplot(data = dataset, aes(x = mean_NDVI_121,  y = photosynthetic_biomass)) + 
+  NDVI_vs_photo_biomass_121 <- ggplot(data = dataset, aes(x = mean_NDVI_121,  y = phytomass)) + 
     geom_point(shape = 1, na.rm = TRUE) +
     labs(
     x = expression(""),
@@ -408,7 +476,7 @@ spacing <- 2
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
-  NDVI_vs_photo_biomass_119 <- ggplot(data = dataset, aes(x = mean_NDVI_119,  y = photosynthetic_biomass)) + 
+  NDVI_vs_photo_biomass_119 <- ggplot(data = dataset, aes(x = mean_NDVI_119,  y = phytomass)) + 
     geom_point(shape = 1, na.rm = TRUE) +
     labs(
       x = expression(""),
@@ -419,7 +487,7 @@ spacing <- 2
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
-  NDVI_vs_photo_biomass_047 <- ggplot(data = dataset, aes(x = mean_NDVI_047, y = photosynthetic_biomass)) + 
+  NDVI_vs_photo_biomass_047 <- ggplot(data = dataset, aes(x = mean_NDVI_047, y = phytomass)) + 
     geom_point(shape = 1, na.rm = TRUE) +
     labs(
       x = expression(""),
@@ -430,7 +498,7 @@ spacing <- 2
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
-  NDVI_vs_photo_biomass_018 <- ggplot(data = dataset, aes(x = mean_NDVI_018,  y = photosynthetic_biomass)) + 
+  NDVI_vs_photo_biomass_018 <- ggplot(data = dataset, aes(x = mean_NDVI_018,  y = phytomass)) + 
     geom_point(shape = 1, na.rm = TRUE) +
     labs(
       x = expression(""),
@@ -516,7 +584,7 @@ spacing <- 2
   (HAG_boxplot <- ggplot(data = dataset_long,
                          aes(x = reorder(PlotID, median, FUN = "median"),
                              y = median, fill = method)) +
-          geom_boxplot(aes(fill = method, 
+          geom_boxplot(aes(fill = method,
                            ymin = min,
                            lower = lower,
                            middle = median,
@@ -540,7 +608,9 @@ spacing <- 2
           theme_coding() +
           theme(legend.position = c(0.15, 0.9), 
                 axis.line.x = element_line(color="black", size = 0.5),
-                axis.line.y = element_line(color="black", size = 0.5)))
+                axis.line.y = element_line(color="black", size = 0.5),
+                axis.text.x = element_text(angle = 90, vjust = 1, hjust = 0.5)
+          ))
         
 # Export boxplot
   png(filename = "plots/Figure S1 - Height boxplot.png", width = 16, height = 11, units = "cm", res = 400)
