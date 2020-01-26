@@ -165,130 +165,66 @@ library(rgeos)                                                                  
     
     
   ### Analysis of NDVI relationships ####
-   # Fitting (linear) models
-    model_NDVI_018_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_018)
-    model_NDVI_047_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_047)
-    model_NDVI_119_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_119)
-    model_NDVI_121_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_121)
-    model_NDVI_018_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_018)
-    model_NDVI_047_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_047)
-    model_NDVI_119_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_119)
-    model_NDVI_121_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_121)
-    model_NDVI_018_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_018)
-    model_NDVI_047_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_047)
-    model_NDVI_119_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_119)
-    model_NDVI_121_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_121)
-    
-    summary(model_NDVI_018_total)
-    summary(model_NDVI_047_total)
-    summary(model_NDVI_119_total)
-    summary(model_NDVI_121_total)
-    summary(model_NDVI_018_photo)
-    summary(model_NDVI_047_photo)
-    summary(model_NDVI_119_photo)
-    summary(model_NDVI_121_photo)
-    summary(model_NDVI_018_leaf)
-    summary(model_NDVI_047_leaf)
-    summary(model_NDVI_119_leaf)
-    summary(model_NDVI_121_leaf)
-    
-
-
-    # Exp models
-
-    exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=0.5, b=0.5), na.action=na.exclude)
-
-    
-    
-    
-        exp_model_total_NDVI_047 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_total_NDVI_119 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    
-    
-    exp_model_photo_NDVI_018 <- nls(phytomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_photo_NDVI_047 <- nls(phytomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_photo_NDVI_119 <- nls(phytomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_photo_NDVI_121 <- nls(phytomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    
-    exp_model_leaf_NDVI_018 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_leaf_NDVI_047 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_leaf_NDVI_119 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    exp_model_leaf_NDVI_121 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    
-    
-    
+   # # Fitting (linear) models
+   #  model_NDVI_018_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_018)
+   #  model_NDVI_047_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_047)
+   #  model_NDVI_119_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_119)
+   #  model_NDVI_121_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_121)
+   #  model_NDVI_018_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_018)
+   #  model_NDVI_047_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_047)
+   #  model_NDVI_119_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_119)
+   #  model_NDVI_121_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_121)
+   #  model_NDVI_018_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_018)
+   #  model_NDVI_047_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_047)
+   #  model_NDVI_119_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_119)
+   #  model_NDVI_121_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_121)
+   #  
+   #  summary(model_NDVI_018_total)
+   #  summary(model_NDVI_047_total)
+   #  summary(model_NDVI_119_total)
+   #  summary(model_NDVI_121_total)
+   #  summary(model_NDVI_018_photo)
+   #  summary(model_NDVI_047_photo)
+   #  summary(model_NDVI_119_photo)
+   #  summary(model_NDVI_121_photo)
+   #  summary(model_NDVI_018_leaf)
+   #  summary(model_NDVI_047_leaf)
+   #  summary(model_NDVI_119_leaf)
+   #  summary(model_NDVI_121_leaf)
     
 
-    exp_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=1, b=1), na.action=na.exclude)
-    pow_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*mean_NDVI_121^b, data=dataset, start = list(a=10.1, b=10.1), na.action=na.exclude)
+    # Exponential models
+    exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
+    exp_model_total_NDVI_047 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
+    exp_model_total_NDVI_119 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
+    exp_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
+    exp_model_photo_NDVI_018 <- nls(phytomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
+    exp_model_photo_NDVI_047 <- nls(phytomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
+    exp_model_photo_NDVI_119 <- nls(phytomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
+    exp_model_photo_NDVI_121 <- nls(phytomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
+    exp_model_leaf_NDVI_018 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
+    exp_model_leaf_NDVI_047 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
+    exp_model_leaf_NDVI_119 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
+    exp_model_leaf_NDVI_121 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
     
-    
-    model_NDVI_047_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_047)
-    model_NDVI_119_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_119)
-    model_NDVI_121_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_121)
-    model_NDVI_018_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_018)
-    model_NDVI_047_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_047)
-    model_NDVI_119_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_119)
-    model_NDVI_121_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_121)
-    model_NDVI_018_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_018)
-    model_NDVI_047_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_047)
-    model_NDVI_119_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_119)
-    model_NDVI_121_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_121)
-    
-    
-  # Developing non-linar models
-    PowModel_Biomass_NDVI_047 <- nls(leaf_biomass ~ a*mean_NDVI_047^b, data = dataset,
-                                     start = list(a =1, b =1), na.action=na.exclude)
-    summary(PowModel_Biomass_NDVI_047)
-    
-    ExpModel_Biomass_NDVI_047 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_047), data = dataset,
-                                     start = list(a =1, b =1), na.action=na.exclude)
-    summary(ExpModel_Biomass_NDVI_047)
-    
-    
-    # plot
-    test_pow <- ggplot(data = dataset,
-                       aes(x = mean_NDVI_047,
-                           y = leaf_biomass)) +
-      geom_point(shape = 1, na.rm = TRUE) +
-      labs(x = expression("mean NDVI"),
-           # y = expression("Leaf dry biomass (g m"^"-2"*")"),
-           y = expression("")
-           # title = "0.018 m grain"
-      ) +
-      stat_function(fun = function(x) (coef(summary(PowModel_Biomass_NDVI_047))[, "Estimate"])[1]*(x)^(coef(summary(PowModel_Biomass_NDVI_047))[, "Estimate"])[2],
-                    aes(), size = 1, lty = "solid") +
-      geom_smooth(method='lm', formula= y~x) +
-      coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-      theme_coding()
-    
-    test_pow
-    
-    
-    # plot
-    test_exp <- ggplot(data = dataset,
-                       aes(x = mean_NDVI_047,
-                           y = leaf_biomass)) +
-      geom_point(shape = 1, na.rm = TRUE) +
-      labs(x = expression("mean NDVI"),
-           # y = expression("Leaf dry biomass (g m"^"-2"*")"),
-           y = expression("")
-           # title = "0.018 m grain"
-      ) +
-      stat_function(fun = function(x) (coef(summary(ExpModel_Biomass_NDVI_047))[, "Estimate"])[1]*exp((coef(summary(ExpModel_Biomass_NDVI_047))[, "Estimate"])[2]*x),
-                    aes(), size = 1, lty = "solid") +
-      geom_smooth(method='lm', formula= y~x) +
-      coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-      theme_coding()
-    
-    test_exp
-    
+    summary(exp_model_total_NDVI_018)
+    summary(exp_model_total_NDVI_047)
+    summary(exp_model_total_NDVI_119)
+    summary(exp_model_total_NDVI_121)
+    summary(exp_model_photo_NDVI_018)
+    summary(exp_model_photo_NDVI_047)
+    summary(exp_model_photo_NDVI_119)
+    summary(exp_model_photo_NDVI_121)
+    summary(exp_model_leaf_NDVI_018)
+    summary(exp_model_leaf_NDVI_047)
+    summary(exp_model_leaf_NDVI_119)
+    summary(exp_model_leaf_NDVI_121)
+
+
     
   ##############################################
   # DEVELOPMENT ####
-  # Test the influence of moss NDVI relationships?
+  # Test the influence of moss cover on NDVI-biomass relationships?
   #
   # Q: What is the proportion of points sampled in each plot that culminate in moss?
   #
@@ -415,10 +351,11 @@ spacing <- 2
   dev.off()
   
 
-# Figure 4. NDVI vs. biomass ----
-# Illustrating relationships between NDVI and various biomass components
 
-# Create plots
+  # Figure 4. NDVI vs. biomass ----
+  # Illustrating relationships between NDVI and various biomass components
+  
+  # Create plots
   # Total biomass
   NDVI_vs_total_biomass_121 <- ggplot(data = dataset, aes(x = mean_NDVI_121, y = AGB_spatially_normalised_g_m2)) + 
     geom_point(shape = 1, na.rm = TRUE) +
@@ -427,7 +364,9 @@ spacing <- 2
       x = expression(""),
       y = expression(atop("Total", paste ("biomass (g m"^"-2"*")"))),
       title = "0.121 m grain") +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_total_NDVI_121))[, "Estimate"])[1]*exp((coef(summary(exp_model_total_NDVI_121))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -438,7 +377,9 @@ spacing <- 2
       x = expression(""),
       y = expression(""),
       title = "0.119 m grain") +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_total_NDVI_119))[, "Estimate"])[1]*exp((coef(summary(exp_model_total_NDVI_119))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -449,7 +390,9 @@ spacing <- 2
       x = expression(""),
       y = expression(""),
       title = "0.047 m grain") +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_total_NDVI_047))[, "Estimate"])[1]*exp((coef(summary(exp_model_total_NDVI_047))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -460,7 +403,9 @@ spacing <- 2
       x = expression(""),
       y = expression(""),
       title = "0.018 m grain") +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_total_NDVI_018))[, "Estimate"])[1]*exp((coef(summary(exp_model_total_NDVI_018))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -469,9 +414,11 @@ spacing <- 2
   NDVI_vs_photo_biomass_121 <- ggplot(data = dataset, aes(x = mean_NDVI_121,  y = phytomass)) + 
     geom_point(shape = 1, na.rm = TRUE) +
     labs(
-    x = expression(""),
-    y = expression(atop("Photosynthetic", paste ("biomass (g m"^"-2"*")")))) +
-    geom_smooth(method='lm', formula= y~x) +
+      x = expression(""),
+      y = expression(atop("Photosynthetic", paste ("biomass (g m"^"-2"*")")))) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_photo_NDVI_121))[, "Estimate"])[1]*exp((coef(summary(exp_model_photo_NDVI_121))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, photo_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -482,7 +429,9 @@ spacing <- 2
       x = expression(""),
       y = expression("")
     ) +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_photo_NDVI_119))[, "Estimate"])[1]*exp((coef(summary(exp_model_photo_NDVI_119))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, photo_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -493,7 +442,9 @@ spacing <- 2
       x = expression(""),
       y = expression("")
     ) +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_photo_NDVI_047))[, "Estimate"])[1]*exp((coef(summary(exp_model_photo_NDVI_047))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, photo_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -504,7 +455,9 @@ spacing <- 2
       x = expression(""),
       y = expression("")
     ) +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_photo_NDVI_018))[, "Estimate"])[1]*exp((coef(summary(exp_model_photo_NDVI_018))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, photo_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -516,7 +469,9 @@ spacing <- 2
     labs(x = expression("NDVI"),
          y = expression(atop("Leaf", paste ("biomass (g m"^"-2"*")")))
     ) +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_leaf_NDVI_121))[, "Estimate"])[1]*exp((coef(summary(exp_model_leaf_NDVI_121))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -526,7 +481,9 @@ spacing <- 2
     labs(x = expression("NDVI"),
          y = expression("")
     ) +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_leaf_NDVI_119))[, "Estimate"])[1]*exp((coef(summary(exp_model_leaf_NDVI_119))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -536,7 +493,9 @@ spacing <- 2
     labs(x = expression("NDVI"),
          y = expression("")
     ) +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_leaf_NDVI_047))[, "Estimate"])[1]*exp((coef(summary(exp_model_leaf_NDVI_047))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
@@ -546,13 +505,15 @@ spacing <- 2
     labs(x = expression("NDVI"),
          y = expression("")
     ) +
-    geom_smooth(method='lm', formula= y~x) +
+    # geom_smooth(method='lm', formula= y~x, se=FALSE) +
+    stat_function(fun = function(x) (coef(summary(exp_model_leaf_NDVI_018))[, "Estimate"])[1]*exp((coef(summary(exp_model_leaf_NDVI_018))[, "Estimate"])[2]*x),
+                  aes(), size = 1, lty = "solid") +
     coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
   
-# Combine plots
+  # Combine plots
   NDVI_biomass <- ggpubr::ggarrange(NDVI_vs_total_biomass_121,
                                     NDVI_vs_total_biomass_119,
                                     NDVI_vs_total_biomass_047, 
@@ -569,14 +530,13 @@ spacing <- 2
                                     ncol = 4, nrow = 3,
                                     align = "v",
                                     labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)", "(i)", "(j)", "(k)", "(l)"),
-                                    # labels = "auto",
                                     font.label = list(size = 11, face = "bold"))
   
   # Export figure
   png(filename="plots/Figure 4 - NDVI vs biomass.png", width=22, height=13, units="cm", res=400)
   plot(NDVI_biomass)
   dev.off()
-
+  
 
   
 # Figure S1. Boxplot of canopy height observations ---- 
