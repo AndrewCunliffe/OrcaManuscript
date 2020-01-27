@@ -165,35 +165,7 @@ library(rgeos)                                                                  
     
     
   ### Analysis of NDVI relationships ####
-   # # Fitting (linear) models
-   #  model_NDVI_018_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_018)
-   #  model_NDVI_047_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_047)
-   #  model_NDVI_119_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_119)
-   #  model_NDVI_121_total <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$mean_NDVI_121)
-   #  model_NDVI_018_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_018)
-   #  model_NDVI_047_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_047)
-   #  model_NDVI_119_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_119)
-   #  model_NDVI_121_photo <- lm(dataset$phytomass ~ dataset$mean_NDVI_121)
-   #  model_NDVI_018_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_018)
-   #  model_NDVI_047_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_047)
-   #  model_NDVI_119_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_119)
-   #  model_NDVI_121_leaf <- lm(dataset$leaf_biomass ~ dataset$mean_NDVI_121)
-   #  
-   #  summary(model_NDVI_018_total)
-   #  summary(model_NDVI_047_total)
-   #  summary(model_NDVI_119_total)
-   #  summary(model_NDVI_121_total)
-   #  summary(model_NDVI_018_photo)
-   #  summary(model_NDVI_047_photo)
-   #  summary(model_NDVI_119_photo)
-   #  summary(model_NDVI_121_photo)
-   #  summary(model_NDVI_018_leaf)
-   #  summary(model_NDVI_047_leaf)
-   #  summary(model_NDVI_119_leaf)
-   #  summary(model_NDVI_121_leaf)
-    
-
-    # Exponential models
+  # Exponential models
     exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
     exp_model_total_NDVI_047 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
     exp_model_total_NDVI_119 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
@@ -222,6 +194,7 @@ library(rgeos)                                                                  
 
 
     
+    
   ##############################################
   # DEVELOPMENT ####
   # Test the influence of moss cover on NDVI-biomass relationships?
@@ -229,7 +202,21 @@ library(rgeos)                                                                  
   # Q: What is the proportion of points sampled in each plot that culminate in moss?
   #
   # Q: What is the proprotion of points sampled in each plot where the first hit is moss?
-  #  
+  # 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
