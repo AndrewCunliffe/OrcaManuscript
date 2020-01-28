@@ -240,7 +240,7 @@ library(sjPlot)                                                                 
     
   # Mixed effects model to test the effect of moss_prop on the NDVI-biomass relationships #
     # biomass as a function of NDVI, with moss_prop as a fixed effect.
-    #### !!!!!!!!!!!!!!!!Model suitability to be confirmed!!!!!!!!!!!! ####
+    #### !!!!! Model suitability to be confirmed !!!!! ####
     model <- lmer(phytomass ~ mean_NDVI_121 + (1|moss_prop), data = dataset)
     summary(model)
     
@@ -604,55 +604,63 @@ spacing <- 2
   # What is the effect of moss_prop on the NDVI-biomass relationships?
   
   # Total biomass
-  plot <- ggplot(data = dataset, aes(mean_NDVI_121,
-                                     AGB_spatially_normalised_g_m2,
-                                     color=moss_prop,
-                                     size=moss_prop)) +
-    geom_point(na.rm = TRUE) + 
-    coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-    labs(
-      x = expression("mean NDVI"),
-      y = expression("Total biomass (g m"^"-2"*")"),
-      title = "Total biomass (0.121 m grain)") +
-    theme_coding() +
-    theme(legend.position = c(0.9, 0.5))
+    plot1 <- ggplot(data = dataset, aes(mean_NDVI_121,
+                                       AGB_spatially_normalised_g_m2,
+                                       color=moss_prop,
+                                       size=moss_prop)) +
+      geom_point(na.rm = TRUE) + 
+      coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+      labs(
+        x = expression("mean NDVI"),
+        y = expression("Total biomass (g m"^"-2"*")")
+        # title = "Total biomass (0.121 m grain)"
+        ) +
+      theme_coding() +
+      theme(legend.position = c(0.9, 0.5))
   
-  ggsave(filename = "plots/Figure S2a - moss effect.png",
-         width = 10, height = 10, units = 'cm', plot = plot)                                           # Save plots
-  
-  
+
   # Phytomas
-  plot <- ggplot(data = dataset, aes(mean_NDVI_121,
-                                     phytomass,
-                                     color=moss_prop,
-                                     size=moss_prop)) +
-    geom_point(na.rm = TRUE) + 
-    coord_cartesian(ylim = c(0, photo_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-    labs(
-      x = expression("mean NDVI"),
-      y = expression("Phytomass (g m"^"-2"*")"),
-      title = "Phytomass (0.121 m grain)") +
-    theme_coding() +
-    theme(legend.position = c(0.9, 0.5))
-  
-  ggsave(filename = "plots/Figure S2b - moss effect.png",
-         width = 10, height = 10, units = 'cm', plot = plot)   
-  
-  
+    plot2 <- ggplot(data = dataset, aes(mean_NDVI_121,
+                                       phytomass,
+                                       color=moss_prop,
+                                       size=moss_prop)) +
+      geom_point(na.rm = TRUE) + 
+      coord_cartesian(ylim = c(0, photo_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+      labs(
+        x = expression("mean NDVI"),
+        y = expression("Phytomass (g m"^"-2"*")")
+        # title = "Phytomass (0.121 m grain)"
+        ) +
+      theme_coding() +
+      theme(legend.position = c(0.9, 0.5))
+
   
   # Leaf biomass
-  plot <- ggplot(data = dataset, aes(mean_NDVI_121,
-                                     leaf_biomass,
-                                     color=moss_prop,
-                                     size=moss_prop)) +
-    geom_point(na.rm = TRUE) + 
-    coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-    labs(
-      x = expression("mean NDVI"),
-      y = expression("Leaf biomass (g m"^"-2"*")"),
-      title = "Leaf biomass (0.121 m grain)") +
-    theme_coding() +
-    theme(legend.position = c(0.9, 0.5))
+    plot3 <- ggplot(data = dataset, aes(mean_NDVI_121,
+                                       leaf_biomass,
+                                       color=moss_prop,
+                                       size=moss_prop)) +
+      geom_point(na.rm = TRUE) + 
+      coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+      labs(
+        x = expression("mean NDVI"),
+        y = expression("Leaf biomass (g m"^"-2"*")")
+        # title = "Leaf biomass (0.121 m grain)"
+        ) +
+      theme_coding() +
+      theme(legend.position = c(0.9, 0.5))
+
   
-  ggsave(filename = "plots/Figure S2c - moss effect.png",
-         width = 10, height = 10, units = 'cm', plot = plot)   
+  # Combine plots
+  moss_plots <- ggpubr::ggarrange(plot1, plot2, plot3,
+                                     heights = c(6),
+                                     labels = c("(a)", "(b)", "(c)"),
+                                     ncol = 1, nrow = 3,
+                                     align = "v")
+  
+  
+  # Export figure
+  png(filename="plots/Figure S2 - Moss interaction with NDVI vesus biomass.png", width=11, height=24.5, units="cm", res=300)
+  plot(moss_plots)
+  dev.off()
+  
