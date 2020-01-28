@@ -21,7 +21,10 @@ library(sf)                                                                     
 library(raster)                                                                 # 
 library(exactextractr)                                                          # efficient and exact extraction of raster statistics. 
 library(rgeos)                                                                  # for validating which hole belongs to which exterior ring
-
+library(lme4)                                                                   # For linear mixed effects models.
+# library(lmerTest)                                                             # For extracting p values from linear mixed effects models (but can sometimes conflict with other packages, so use carfeully and be aware of errors!).
+library(ggeffects)                                                              # For plotting mixed effects models.
+library(sjPlot)                                                                 # For plotting mixed effects models.
 
 # #### Extract NDVI values from rasters ----
 #   # Load data for raster extraction
@@ -113,7 +116,41 @@ library(rgeos)                                                                  
     dataset_long <- data.frame(PlotID, method, min, lower, median, upper, max)  # Create vectors into new dataframe
     rm(PlotID, method, min, lower, median, upper, max)
 
+    
+  ### Analysis of moss cover effect on NDVI-biomass relationships ###
+    # Count number of locations sampled within each plot
+    PF_count <- PF_observations %>%
+      dplyr::select(-Species, -Status, -Tissue, -Count, -Height) %>% 
+      group_by(PlotN) %>%
+      distinct() %>% 
+      count() %>% 
+      rename(PF_obs = n)
+    
+    # Count the number of locations where moss was observed within each plot
+    PF_moss <- PF_observations %>% 
+      group_by(PlotN) %>% 
+      filter(Species == "XXXothermoss") %>% 
+      count() %>% 
+      rename(moss_obs = n)
+    
+    # Add zero for plots containing no moss
+    PF_moss[nrow(PF_moss) + 1,] = list("SP04", 0)
+    PF_moss[nrow(PF_moss) + 1,] = list("SP07", 0)
+    PF_moss[nrow(PF_moss) + 1,] = list("SP11", 0)
+    PF_moss[nrow(PF_moss) + 1,] = list("SP34", 0)
+    PF_moss <- dplyr::arrange(PF_moss, PlotN)  # re-order plots
+    
+    # Determine the proportion of PF locations that were moss for each plot
+    PF_moss_summary <- PF_count
+    PF_moss_summary$moss_obs <- PF_moss$moss_obs
+    PF_moss_summary$moss_prop <- PF_moss_summary$moss_obs / PF_moss_summary$PF_obs
+    
+    # Add moss proportion to main dataframe
+    dataset$moss_prop <- PF_moss_summary$moss_prop
+    
 
+    
+    
 ### Data Analysis ----
 
   ### Analysis of canopy heights ####
@@ -164,7 +201,7 @@ library(rgeos)                                                                  
 
     
     
-  ### Analysis of NDVI relationships ####
+  ### Analysis of NDVI - biomass relationships ####
   # Exponential models
     exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
     exp_model_total_NDVI_047 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
@@ -192,27 +229,25 @@ library(rgeos)                                                                  
     summary(exp_model_leaf_NDVI_119)
     summary(exp_model_leaf_NDVI_121)
 
+    
+    
 
     
+### Analysis of moss cover effect on NDVI-biomass relationships ####
+  # Quantitative evaluation of the Figure S2 plots (below) suggests that plots with low
+  # proportions of moss cover (observed in the point framing) may have lower NDVI values
+  # for a given value of biomass.
     
-  ##############################################
-  # DEVELOPMENT ####
-  # Test the influence of moss cover on NDVI-biomass relationships?
-  #
-  # Q: What is the proportion of points sampled in each plot that culminate in moss?
-  #
-  # Q: What is the proprotion of points sampled in each plot where the first hit is moss?
-  # 
-    
-    
-    
+  # Mixed effects model to test the effect of moss_prop on the NDVI-biomass relationships #
+    # biomass as a function of NDVI, with moss_prop as a fixed effect.
+    #### !!!!!!!!!!!!!!!!Model suitability to be confirmed!!!!!!!!!!!! ####
+    model <- lmer(phytomass ~ mean_NDVI_121 + (1|moss_prop), data = dataset)
+    summary(model)
     
     
+  # Q: Should we ignore moss under litter?
     
-    
-    
-    
-    
+  # Q: Should we consider moss differently dpeending on whether it is the *first hit*?
     
     
     
@@ -565,4 +600,59 @@ spacing <- 2
   dev.off()
 
 
-      
+### Figure S2. Effect of moss on NDVI-Biomass relationship ####
+  # What is the effect of moss_prop on the NDVI-biomass relationships?
+  
+  # Total biomass
+  plot <- ggplot(data = dataset, aes(mean_NDVI_121,
+                                     AGB_spatially_normalised_g_m2,
+                                     color=moss_prop,
+                                     size=moss_prop)) +
+    geom_point(na.rm = TRUE) + 
+    coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+    labs(
+      x = expression("mean NDVI"),
+      y = expression("Total biomass (g m"^"-2"*")"),
+      title = "Total biomass (0.121 m grain)") +
+    theme_coding() +
+    theme(legend.position = c(0.9, 0.5))
+  
+  ggsave(filename = "plots/Figure S2a - moss effect.png",
+         width = 10, height = 10, units = 'cm', plot = plot)                                           # Save plots
+  
+  
+  # Phytomas
+  plot <- ggplot(data = dataset, aes(mean_NDVI_121,
+                                     phytomass,
+                                     color=moss_prop,
+                                     size=moss_prop)) +
+    geom_point(na.rm = TRUE) + 
+    coord_cartesian(ylim = c(0, photo_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+    labs(
+      x = expression("mean NDVI"),
+      y = expression("Phytomass (g m"^"-2"*")"),
+      title = "Phytomass (0.121 m grain)") +
+    theme_coding() +
+    theme(legend.position = c(0.9, 0.5))
+  
+  ggsave(filename = "plots/Figure S2b - moss effect.png",
+         width = 10, height = 10, units = 'cm', plot = plot)   
+  
+  
+  
+  # Leaf biomass
+  plot <- ggplot(data = dataset, aes(mean_NDVI_121,
+                                     leaf_biomass,
+                                     color=moss_prop,
+                                     size=moss_prop)) +
+    geom_point(na.rm = TRUE) + 
+    coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+    labs(
+      x = expression("mean NDVI"),
+      y = expression("Leaf biomass (g m"^"-2"*")"),
+      title = "Leaf biomass (0.121 m grain)") +
+    theme_coding() +
+    theme(legend.position = c(0.9, 0.5))
+  
+  ggsave(filename = "plots/Figure S2c - moss effect.png",
+         width = 10, height = 10, units = 'cm', plot = plot)   
