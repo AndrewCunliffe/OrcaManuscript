@@ -25,6 +25,10 @@ library(lme4)                                                                   
 # library(lmerTest)                                                             # For extracting p values from linear mixed effects models (but can sometimes conflict with other packages, so use carfeully and be aware of errors!).
 library(ggeffects)                                                              # For plotting mixed effects models.
 library(sjPlot)                                                                 # For plotting mixed effects models.
+library(raster)                                                                 # For extracting raster values
+library(rgdal)
+library(sp)
+
 
 # #### Extract NDVI values from rasters ----
 #   # Load data for raster extraction
@@ -148,7 +152,43 @@ library(sjPlot)                                                                 
     # Add moss proportion to main dataframe
     dataset$moss_prop <- PF_moss_summary$moss_prop
     
-
+  ### Extract distributions of canopy heights from SfM rasters ###
+    
+    # List of elevation rasters 
+    raster_list <- list.files(path = "data/Height_rasters/",
+                              full.names=TRUE)
+    
+    # Create dataframe
+    SFM_heights <- data.frame()
+    
+    # Extract height values
+    for (file in raster_list){
+      PlotN <- substr(file, 37, 39)  # Extract PlotN from file
+      
+      # Read raster
+      height_rast <- raster(file, band=2)  # NB. Band 2 specifies the maximum height recorded in each cell.
+      
+      # # Plot the distribution of values in the raster
+      # hist(height_rast, main=paste0("Distribution of heights in plot ", PlotN, sep=""), 
+      #      col= "purple", 
+      #      maxpixels=10000,
+      #      xlab = "height (m)", 
+      #      xlim = c(0, 1.2))
+      
+      heights <- getValues(height_rast)  # Summarise height values
+      
+      heights <- na.exclude(heights)  # Remove NAs.
+      
+      height_distributions <- data.frame(heights)  # Convert to dataframe
+      
+      height_distributions$PlotN <- PlotN  # Add PlotN
+      
+      SFM_heights <- rbind(SFM_heights, height_distributions)  # Integrate heights to dataframe. 
+      
+      rm(heights, height_distributions)  # Tidy up
+    }
+    
+    
     
     
 ### Data Analysis ----
@@ -288,39 +328,39 @@ spacing <- 2
 # Figure 2. Canopy height comparison ----
 # mean point framing canopy height versus mean structure-from-motion canopy height
 
-# Create plot
-  (Canopy_heights_plot <- ggplot(data = dataset,
-                                aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
-              geom_point(shape = 1) +
-              labs(x = "Point Frame - Canopy Height (m)",
-                   y = "SfM - Canopy height (m)") +
-              theme_coding() +
-              coord_cartesian(ylim = c(0, 1), xlim = c(0, 1), expand=FALSE) +
-              geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
-           stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
-                        formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 3, size = 3, parse = TRUE,
-                        label.x.npc = 0.90, label.y.npc = 0.10) +
-              geom_smooth(method="lm", formula= y ~ x, se=FALSE, size=0.5, na.rm = TRUE))
-
-
-(Canopy_heights_plot <- ggplot(data = dataset,
-                               aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
-    geom_point(shape = 1) +
-    labs(x = "Point Frame - Canopy Height (m)",
-         y = "SfM - Canopy height (m)") +
-    theme_coding() +
-    coord_cartesian(ylim = c(0, 1), xlim = c(0, 1), expand=FALSE) +
-    geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
-    stat_function(fun = function(x) (coef(summary(model_heights_pow))[, "Estimate"])[1]*(x)^(coef(summary(model_heights_pow))[, "Estimate"])[2],
-                  aes(), size = 1, lty = "solid", colour="Black") +
-    annotate("text", x = 0.8, y = 0.1, label = "italic(Y)==1.085~italic(X)^0.715", parse = TRUE,
-             color = "black", size = 4, family = "serif")
-  )
-
-# Export plot
-  png(filename = "plots/Figure 2 - Canopy Heights2.png", width = 10, height = 10, units = "cm", res = 400)
-  plot(Canopy_heights_plot)
-  dev.off()
+  # Create plot
+    (Canopy_heights_plot <- ggplot(data = dataset,
+                                  aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
+                geom_point(shape = 1) +
+                labs(x = "Point Frame - Canopy Height (m)",
+                     y = "SfM - Canopy height (m)") +
+                theme_coding() +
+                coord_cartesian(ylim = c(0, 1), xlim = c(0, 1), expand=FALSE) +
+                geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
+             stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
+                          formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 3, size = 3, parse = TRUE,
+                          label.x.npc = 0.90, label.y.npc = 0.10) +
+                geom_smooth(method="lm", formula= y ~ x, se=FALSE, size=0.5, na.rm = TRUE))
+  
+  
+    (Canopy_heights_plot <- ggplot(data = dataset,
+                                   aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
+        geom_point(shape = 1) +
+        labs(x = "Point Frame - Canopy Height (m)",
+             y = "SfM - Canopy height (m)") +
+        theme_coding() +
+        coord_cartesian(ylim = c(0, 1), xlim = c(0, 1), expand=FALSE) +
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
+        stat_function(fun = function(x) (coef(summary(model_heights_pow))[, "Estimate"])[1]*(x)^(coef(summary(model_heights_pow))[, "Estimate"])[2],
+                      aes(), size = 1, lty = "solid", colour="Black") +
+        annotate("text", x = 0.8, y = 0.1, label = "italic(Y)==1.085~italic(X)^0.715", parse = TRUE,
+                 color = "black", size = 4, family = "serif")
+      )
+    
+  # Export plot
+    png(filename = "plots/Figure 2 - Canopy Heights2.png", width = 10, height = 10, units = "cm", res = 400)
+    plot(Canopy_heights_plot)
+    dev.off()
 
 
 
@@ -664,3 +704,26 @@ spacing <- 2
   plot(moss_plots)
   dev.off()
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+  
+  
+      
+
+
+
+
+
+
