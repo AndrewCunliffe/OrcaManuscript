@@ -222,7 +222,7 @@ library(sp)
     
     
     
-  ### Analysis of canopy height as predictor of biomass ####
+  #### Analysis of canopy height as predictor of biomass ####
     # unconstrained intercept
     model_PFu <- lm(dataset$AGB_spatially_normalised_g_m2 ~ dataset$PF_HAG_mean)
     summary(model_PFu)
@@ -280,7 +280,7 @@ library(sp)
     
   # Mixed effects model to test the effect of moss_prop on the NDVI-biomass relationships #
     # biomass as a function of NDVI, with moss_prop as a fixed effect.
-    #### !!!!! Model suitability to be confirmed !!!!! ####
+    #### !!!!! Mixed effects model to be refined / confirmed !!!!! ####
     model <- lmer(phytomass ~ mean_NDVI_121 + (1|moss_prop), data = dataset)
     summary(model)
     
