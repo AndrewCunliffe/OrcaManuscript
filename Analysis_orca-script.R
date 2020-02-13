@@ -5,6 +5,7 @@ rm(list = ls(all.names = TRUE))
 home <- "C:/workspace/OrcaManuscript/"
 
 # Install required packages ----
+library(suncalc)
 library(tidyverse)
 library(viridis)
 library(grid)                                                                   # required for plot annotation 
@@ -30,39 +31,53 @@ library(rgdal)
 library(sp)
 
 
-# #### Extract NDVI values from rasters ----
+#### Extract NDVI values from rasters ----
 #   # Load data for raster extraction
 #   feature_filename <- paste0(home, "data/20160725_AC_ORC - formated for exact extractr.geojson")
 #   plots <- st_read(feature_filename, crs = 32607)                               # Import geoJSON as sf object, using st_read to allow the non-standerd CRS to be specified.
-#   
-#   
-#   # Import rasters (Available from NERC Polar Data Centre - see readme) 
+# 
+# 
+#   # Import rasters (Available from the NERC Polar Data Centre - see readme for details)
 #   raster_018 <- raster(paste0(home, "inputs_NDVI/NDVI_019m_from_20160726.tif")) # import plot shapefiles.
 #   raster_047 <- raster(paste0(home, "inputs_NDVI/NDVI_050m_from_20160730.tif")) # import plot shapefiles.
 #   raster_119 <- raster(paste0(home, "inputs_NDVI/NDVI_120m_from_20160730.tif")) # import plot shapefiles.
 #   raster_121 <- raster(paste0(home, "inputs_NDVI/NDVI_120m_from_20160726.tif")) # import plot shapefiles.
-#   
-#   
-#   # Calculate mean NDVI for each polygon 
-#   plots$mean_NDVI_018 <- exact_extract(raster_018, plots, 'mean')                        
-#   plots$mean_NDVI_047 <- exact_extract(raster_047, plots, 'mean')                        
-#   plots$mean_NDVI_119 <- exact_extract(raster_119, plots, 'mean')                        
-#   plots$mean_NDVI_121 <- exact_extract(raster_121, plots, 'mean')       
-#   
+# 
+# 
+#   # Calculate mean NDVI for each polygon
+#   plots$mean_NDVI_018 <- exact_extract(raster_018, plots, 'mean')
+#   plots$mean_NDVI_047 <- exact_extract(raster_047, plots, 'mean')
+#   plots$mean_NDVI_119 <- exact_extract(raster_119, plots, 'mean')
+#   plots$mean_NDVI_121 <- exact_extract(raster_121, plots, 'mean')
+# 
 #   # Tidy dataframe
 #   plots_df <- st_drop_geometry(plots)                                           # Create dataframe from simple features object (dropping geometry).
 #   plots_df$EPSG <- NULL                                                         # Remove unecessary EPSG column from dataframe.
 #   plots_df <- plots_df[order(plots_df$PlotID),]                                 # Order dataframe by PlotID.
-#   
+# 
 #   # Export NDVI values
 #   write.csv(plots_df,"data/Extracted_NDVI.csv", row.names = FALSE)            # extracted NDVI values were added to the main_database file. ndvi_data <- read.csv("data/Extracted_NDVI.csv", header = T)                  # Read in NDVI values from Exact Extract pipeline.
 
   
 
 # Load datasets ----
+  loc_time_data <- read.csv("data/location_time_for_suncalc.csv", header = T)         # Read in locations and survey times for the suncalc
   dataset <- read.csv("data/main_database.csv", header = T)                     # Read in summary  data
   PF_observations <- read.csv("data/point_framing_observations.csv")            # Read in canopy height from point framing
 
+
+# Extract solar angles for the surveys
+    datetime_UTC <- as.character(loc_time_data$datetime_UTC)
+    SunPosition <- getSunlightPosition(date = datetime_UTC, lat = 69.57133, lon = -138.8909)
+    
+    # Function to convert from radians to degrees
+    rad2deg <- function(rad) {(rad * 180) / (pi)}
+  
+    SunPosition$altitude_degrees <- rad2deg(SunPosition$altitude)
+    SunPosition
+  
+
+  
 # Data preparation ----
   # Point framing observations
   # remove unwanted index position.
@@ -91,7 +106,7 @@ library(sp)
     # Return only unique row summarising canopy heights for each plot. This could be integrated into the preceeding pipe...
     PF_HAG_summary <- PF_HAG_summary[!duplicated(PF_HAG_summary$PlotN), ]
     
-    # Remove unwanted/erronious individual height. This could be integrated into the preceding pipe...
+    # Remove unwanted/erronious individual height. This could be integrated into the preceeding pipe...
     PF_HAG_summary <- subset(PF_HAG_summary, select = -Height)
     
     # Add point framing HAGs into main dataframe
@@ -120,6 +135,20 @@ library(sp)
     dataset_long <- data.frame(PlotID, method, min, lower, median, upper, max)  # Create vectors into new dataframe
     rm(PlotID, method, min, lower, median, upper, max)
 
+    
+  # Create long form dataset for NDVI boxplot
+    # NB. It is not straightforward to extract summary statistics like IQR for the
+    # NDVI rasters, because these metrics are not readily accessible via the exactextractr package.
+    # Mean, mode, max and min are readily available.
+    PlotID <- rep(dataset$PlotID, times = 4)
+    grain <- rep(c('0.018', '0.047', '0.119', '0.121'), each = 36)
+    mean_NDVI <- c(dataset$mean_NDVI_018, 
+                   dataset$mean_NDVI_047, 
+                   dataset$mean_NDVI_119, 
+                   dataset$mean_NDVI_121)
+    NDVI_data_long <- data.frame(PlotID, grain, mean_NDVI)  # Create vectors into new dataframe
+    rm(PlotID, grain, mean_NDVI)  # Tidy up
+    
     
   ### Analysis of moss cover effect on NDVI-biomass relationships ###
     # Count number of locations sampled within each plot
@@ -412,7 +441,75 @@ spacing <- 2
   plot(biomass_plots)
   dev.off()
   
-
+  
+  
+  
+  
+# Figure 3. NEW including NDVI ----
+  # Create plot
+  (biomass_CH_SfM <- ggplot(data = dataset,
+                            aes(x = HAG_plotmean_of_cellmax_m,
+                                y = AGB_spatially_normalised_g_m2)) + 
+      geom_point(shape = 1, na.rm = TRUE) +
+      theme_coding() +
+      coord_cartesian(ylim = c(0, 3000), xlim = c(0, 1), expand=FALSE) +
+      labs(x = expression("Canopy height (m)"),
+           y = expression("Dry biomass (g m"^"-2"*")"),
+           title = "SfM") +
+      stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
+                   formula = y ~ x-1, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
+                   label.x.npc = 0.03, label.y.npc = 0.99) +
+      theme(legend.position = c(0.15, 0.9)) +
+      geom_smooth(method="lm", formula= y ~ x-1, se=TRUE, size=0.5, na.rm = TRUE))
+  
+  
+  (biomass_CH_PF <- ggplot(data = dataset,
+                           aes(x = PF_HAG_mean,
+                               y = AGB_spatially_normalised_g_m2)) + 
+      geom_point(shape = 1, na.rm = TRUE) +
+      theme_coding() +
+      coord_cartesian(ylim = c(0, 3000), xlim = c(0, 1), expand=FALSE) +
+      labs(x = expression("Canopy height (m)"),
+           y = expression("Dry biomass (g m"^"-2"*")"),
+           title = "Point Framing") +
+      stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
+                   formula = y ~ x-1, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
+                   label.x.npc = 0.03, label.y.npc = 0.99) +
+      theme(legend.position = c(0.15, 0.9)) +
+      geom_smooth(method="lm", formula= y ~ x-1, se=TRUE, size=0.5, na.rm = TRUE))
+  
+  (biomass_NDVI <- ggplot(data = dataset,
+                          aes(x = mean_NDVI_121,
+                              y = AGB_spatially_normalised_g_m2)) + 
+      geom_point(shape = 1, na.rm = TRUE) +
+      theme_coding() +
+      coord_cartesian(ylim = c(0, 3000), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+      labs(x = expression("NDVI (0.121 m grain)"),
+           y = expression("Dry biomass (g m"^"-2"*")"),
+           title = "NDVI") +
+      stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
+                   formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
+                   label.x.npc = 0.03, label.y.npc = 0.99) +
+      theme(legend.position = c(0.15, 0.9)) +
+      geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+  
+  # Combine plots
+  biomass_plots <- ggpubr::ggarrange(biomass_CH_PF, biomass_CH_SfM, biomass_NDVI,
+                                     heights = c(10,10,10),
+                                     labels = c("(a)", "(b)", "(c)"),
+                                     ncol = 3, nrow = 1,
+                                     align = "h")
+  
+  
+  # Export figure
+  png(filename="plots/Figure 3 - NEW Biomass Predictions.png", width=20, height=7, units="cm", res=400)
+  plot(biomass_plots)
+  dev.off()
+  
+  
+  
+  
+  
 
   # Figure 4. NDVI vs. biomass ----
   # Illustrating relationships between NDVI and various biomass components
@@ -714,16 +811,79 @@ spacing <- 2
   
   
   
+# Figure XXX. Testing Leaf mass & Phytomass as predictors of biomass ----
+  # Create plot
+  (phytomass_biomass <- ggplot(data = dataset,
+                              aes(x = phytomass,
+                                y = AGB_spatially_normalised_g_m2)) + 
+     geom_point(shape = 1, na.rm = TRUE) +
+     theme_coding() +
+     coord_cartesian(ylim = c(0, max_agb), xlim = c(0, 600), expand=FALSE) +
+     labs(x = expression("Phytomass (g m"^"-2"*")"),
+          y = expression("Biomass (g m"^"-2"*")"),
+          title = "Phytomass - Biomass") +
+      stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
+                   formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
+                   label.x.npc = 0.6, label.y.npc = 0.95) +
+     geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+  
+  # Create plot
+  (leafmass_biomass <- ggplot(data = dataset,
+                               aes(x = leaf_biomass,
+                               y = AGB_spatially_normalised_g_m2)) + 
+      geom_point(shape = 1, na.rm = TRUE) +
+      theme_coding() +
+      coord_cartesian(ylim = c(0, max_agb), xlim = c(0, 150), expand=FALSE) +
+      labs(x = expression("Leaf biomass (g m"^"-2"*")"),
+           y = expression("Biomass (g m"^"-2"*")"),
+           title = "Leaf biomass - Biomass") +
+      stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
+                   formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
+                   label.x.npc = 0.05, label.y.npc = 0.95) +
+      geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+  
+  # Combine plots
+  combined_biomass_parts <- ggpubr::ggarrange(phytomass_biomass, leafmass_biomass,
+                                     heights = c(10, 10),
+                                     labels = c("(a)", "(b)"),
+                                     ncol = 2, nrow = 1,
+                                     align = "h")
+  
+  
+  # Export figure
+  png(filename="plots/Figure XXX - leaf and phytomass vesus biomass.png", width=14, height=7, units="cm", res=400)
+  plot(combined_biomass_parts)
+  dev.off()
   
   
 
+  
+# Figure XXX. Comparison of NDVI observations  ----
+  # Consider using geom_errorline to add error bars indicating the maximum and minimum NDVI values observed...
+  
+  # Create barplot
+      (NDVI_barplot <- ggplot(data = NDVI_data_long,
+                             aes(x = PlotID),
+                                 y = mean_NDVI,
+                             # group = grain,
+                             fill = grain) +
+         geom_col(aes(y=mean_NDVI, fill = grain), width=0.75, position = position_dodge2(preserve = "single")) +
+         scale_fill_grey(start = 0.2, end = 0.8, aesthetics = "fill", guide = guide_legend(direction = "horizontal")) +
+         scale_y_continuous(lim = c(0, 0.9)) +
+         labs(x = "Plot ID", 
+              y = expression("mean NDVI"),
+              title = "Comparison of mean NDVI") +
+         theme_coding() +
+         theme(legend.position = c(0.19, 0.96), 
+               axis.line.x = element_line(color="black", size = 0.5),
+               axis.line.y = element_line(color="black", size = 0.5),
+               axis.text.x = element_text(angle = 90, vjust = 1, hjust = 0.5))
+      )
 
-  
-  
+      # Export barplot
+      png(filename = "plots/Figure XXX - NDVI barplot.png", width = 16, height = 20, units = "cm", res = 400)
+      plot(NDVI_barplot)
+      dev.off()
+
       
-
-
-
-
-
-
+      
