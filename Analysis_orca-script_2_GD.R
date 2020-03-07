@@ -382,7 +382,12 @@ summary(model3)
 
 # It is easier to interpret an interaction with a graph
 
-ggpredict(model3, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding()
+interaction_NDVI_moss <- ggpredict(model3, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding()
+
+# Export plot
+png(filename = "plots/interaction_NDVI_moss.png", width = 10, height = 10, units = "cm", res = 400)
+plot(interaction_NDVI_moss)
+dev.off()
 
 # So when moss cover is low, there is a positive relationship between biomass and NDVI
 # As moss cover increases, that relationship starts to flatten out and for high moss proportion disappears
@@ -399,7 +404,7 @@ ggpredict(model3, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_co
     # G: I guess that moss is not very visible so won't be influencing NDVI much?
     # But also other times you might get just a leaf over a patchy moss so the leaf is not obstructing the moss much
     
-  # Q: Should we consider moss differently dpeending on whether it is the *first hit*?
+  # Q: Should we consider moss differently depending on whether it is the *first hit*?
     # Probably not? I feel like we don't have enough details as sometimes the first hit might be moss but there
 # could still be say a willow shading it above, the willow just could have stayed 2mm away from the pin
     
@@ -431,7 +436,7 @@ max_hag <- 1.1*max(max(dataset$HAG_plotmax_of_cellmax_m, na.rm = TRUE), max(data
 max_mean_hag <- 1.1*max(max(dataset$HAG_plotmean_of_cellmax_m, na.rm = TRUE), max(dataset$PF_HAG_mean))
 max_ndvi <- 0.91
 min_ndvi <- 0.6
-phyto_biomass_max <- 1.12*max(dataset$phytomass)
+phytomass_max <- 1.12*max(dataset$phytomass)
 spacing <- 2
 
 
@@ -602,7 +607,7 @@ spacing <- 2
   # Create plots
   # Total biomass
     # Set parameters for the log plots.
-    phyto_biomass_max_log <- ceiling(max(log(dataset$phytomass)))*1.1
+    phytomass_max_log <- ceiling(max(log(dataset$phytomass)))*1.1
     max_agb_log <- ceiling(max(log(dataset$AGB_spatially_normalised_g_m2)))*1.1
     phyto_biomass_min_log <- floor(min(log(dataset$phytomass)))*0.9
     min_agb_log <- floor(min(log(dataset$AGB_spatially_normalised_g_m2)))*0.9
@@ -674,7 +679,7 @@ spacing <- 2
     # geom_smooth(method='lm', formula= y~x, se=FALSE) +
     # stat_function(fun = function(x) (coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[1]*exp((coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[2]*x),
     #               aes(), size = 1, lty = "solid") +
-    coord_cartesian(ylim = c(phyto_biomass_min_log, phyto_biomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+    coord_cartesian(ylim = c(phyto_biomass_min_log, phytomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
@@ -688,7 +693,7 @@ spacing <- 2
     # geom_smooth(method='lm', formula= y~x, se=FALSE) +
     # stat_function(fun = function(x) (coef(summary(exp_model_phyto_NDVI_119))[, "Estimate"])[1]*exp((coef(summary(exp_model_phyto_NDVI_119))[, "Estimate"])[2]*x),
     #               aes(), size = 1, lty = "solid") +
-    coord_cartesian(ylim = c(phyto_biomass_min_log, phyto_biomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+    coord_cartesian(ylim = c(phyto_biomass_min_log, phytomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
@@ -702,7 +707,7 @@ spacing <- 2
     # geom_smooth(method='lm', formula= y~x, se=FALSE) +
     # stat_function(fun = function(x) (coef(summary(exp_model_phyto_NDVI_047))[, "Estimate"])[1]*exp((coef(summary(exp_model_phyto_NDVI_047))[, "Estimate"])[2]*x),
     #               aes(), size = 1, lty = "solid") +
-    coord_cartesian(ylim = c(phyto_biomass_min_log, phyto_biomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+    coord_cartesian(ylim = c(phyto_biomass_min_log, phytomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
@@ -716,7 +721,7 @@ spacing <- 2
     # geom_smooth(method='lm', formula= y~x, se=FALSE) +
     # stat_function(fun = function(x) (coef(summary(exp_model_phyto_NDVI_018))[, "Estimate"])[1]*exp((coef(summary(exp_model_phyto_NDVI_018))[, "Estimate"])[2]*x),
     #               aes(), size = 1, lty = "solid") +
-    coord_cartesian(ylim = c(phyto_biomass_min_log, phyto_biomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+    coord_cartesian(ylim = c(phyto_biomass_min_log, phytomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
     theme_coding() +
     theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
   
@@ -841,68 +846,68 @@ spacing <- 2
 
 
 ### Figure S2. Effect of moss on NDVI-Biomass relationship ####
-  # What is the effect of moss_prop on the NDVI-biomass relationships?
-  
-  # Total biomass
-    plot1 <- ggplot(data = dataset, aes(mean_NDVI_121,
-                                       AGB_spatially_normalised_g_m2,
-                                       color=moss_prop,
-                                       size=moss_prop)) +
-      geom_point(na.rm = TRUE) + 
-      coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-      labs(
-        x = expression("mean NDVI"),
-        y = expression("Total biomass (g m"^"-2"*")")
-        # title = "Total biomass (0.121 m grain)"
-        ) +
-      theme_coding() +
-      theme(legend.position = c(0.9, 0.5))
-  
-
-  # Phytomas
-    plot2 <- ggplot(data = dataset, aes(mean_NDVI_121,
-                                       phytomass,
-                                       color=moss_prop,
-                                       size=moss_prop)) +
-      geom_point(na.rm = TRUE) + 
-      coord_cartesian(ylim = c(0, phyto_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-      labs(
-        x = expression("mean NDVI"),
-        y = expression("Phytomass (g m"^"-2"*")")
-        # title = "Phytomass (0.121 m grain)"
-        ) +
-      theme_coding() +
-      theme(legend.position = c(0.9, 0.5))
-
-  
-  # Leaf biomass
-    plot3 <- ggplot(data = dataset, aes(mean_NDVI_121,
-                                       leaf_biomass,
-                                       color=moss_prop,
-                                       size=moss_prop)) +
-      geom_point(na.rm = TRUE) + 
-      coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
-      labs(
-        x = expression("mean NDVI"),
-        y = expression("Leaf biomass (g m"^"-2"*")")
-        # title = "Leaf biomass (0.121 m grain)"
-        ) +
-      theme_coding() +
-      theme(legend.position = c(0.9, 0.5))
-
-  
-  # Combine plots
-  moss_plots <- ggpubr::ggarrange(plot1, plot2, plot3,
-                                     heights = c(6),
-                                     labels = c("(a)", "(b)", "(c)"),
-                                     ncol = 1, nrow = 3,
-                                     align = "v")
-  
-  
-  # Export figure
-  png(filename="plots/Figure S2 - Moss interaction with NDVI vesus biomass.png", width=11, height=24.5, units="cm", res=300)
-  plot(moss_plots)
-  dev.off()
+  # # What is the effect of moss_prop on the NDVI-biomass relationships?
+  # 
+  # # Total biomass
+  #   plot1 <- ggplot(data = dataset, aes(mean_NDVI_121,
+  #                                      AGB_spatially_normalised_g_m2,
+  #                                      color=moss_prop,
+  #                                      size=moss_prop)) +
+  #     geom_point(na.rm = TRUE) + 
+  #     coord_cartesian(ylim = c(0, max_agb), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+  #     labs(
+  #       x = expression("mean NDVI"),
+  #       y = expression("Total biomass (g m"^"-2"*")")
+  #       # title = "Total biomass (0.121 m grain)"
+  #       ) +
+  #     theme_coding() +
+  #     theme(legend.position = c(0.9, 0.5))
+  # 
+  # 
+  # # Phytomas
+  #   plot2 <- ggplot(data = dataset, aes(mean_NDVI_121,
+  #                                      phytomass,
+  #                                      color=moss_prop,
+  #                                      size=moss_prop)) +
+  #     geom_point(na.rm = TRUE) + 
+  #     coord_cartesian(ylim = c(0, phytomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+  #     labs(
+  #       x = expression("mean NDVI"),
+  #       y = expression("Phytomass (g m"^"-2"*")")
+  #       # title = "Phytomass (0.121 m grain)"
+  #       ) +
+  #     theme_coding() +
+  #     theme(legend.position = c(0.9, 0.5))
+  # 
+  # 
+  # # Leaf biomass
+  #   plot3 <- ggplot(data = dataset, aes(mean_NDVI_121,
+  #                                      leaf_biomass,
+  #                                      color=moss_prop,
+  #                                      size=moss_prop)) +
+  #     geom_point(na.rm = TRUE) + 
+  #     coord_cartesian(ylim = c(0, 200), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+  #     labs(
+  #       x = expression("mean NDVI"),
+  #       y = expression("Leaf biomass (g m"^"-2"*")")
+  #       # title = "Leaf biomass (0.121 m grain)"
+  #       ) +
+  #     theme_coding() +
+  #     theme(legend.position = c(0.9, 0.5))
+  # 
+  # 
+  # # Combine plots
+  # moss_plots <- ggpubr::ggarrange(plot1, plot2, plot3,
+  #                                    heights = c(6),
+  #                                    labels = c("(a)", "(b)", "(c)"),
+  #                                    ncol = 1, nrow = 3,
+  #                                    align = "v")
+  # 
+  # 
+  # # Export figure
+  # png(filename="plots/Figure S2 - Moss interaction with NDVI vesus biomass.png", width=11, height=24.5, units="cm", res=300)
+  # plot(moss_plots)
+  # dev.off()
   
   
   
