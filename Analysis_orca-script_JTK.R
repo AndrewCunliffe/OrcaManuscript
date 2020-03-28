@@ -274,20 +274,7 @@ library(miscTools)
     
     
   ### Analysis of NDVI - biomass relationships ####
-  # Exponential models
-    # exp_model_total_NDVI_018 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
-    # exp_model_total_NDVI_047 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
-    # exp_model_total_NDVI_119 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
-    # exp_model_total_NDVI_121 <- nls(AGB_spatially_normalised_g_m2 ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=30, b=4), na.action=na.exclude)
-    # exp_model_photo_NDVI_018 <- nls(phytomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    # exp_model_photo_NDVI_047 <- nls(phytomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    # exp_model_photo_NDVI_119 <- nls(phytomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    # exp_model_photo_NDVI_121 <- nls(phytomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    # exp_model_leaf_NDVI_018 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_018), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    # exp_model_leaf_NDVI_047 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_047), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    # exp_model_leaf_NDVI_119 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_119), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    # exp_model_leaf_NDVI_121 <- nls(leaf_biomass ~ a*exp(b*mean_NDVI_121), data=dataset, start = list(a=30, b=1), na.action=na.exclude)
-    
+
     
   # Logarithmic models
     log_model_total_NDVI_121 <- lm(log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_121, data=dataset, na.action=na.exclude)
@@ -303,47 +290,7 @@ library(miscTools)
     log_model_leaf_NDVI_047 <- lm(log(leaf_biomass) ~ mean_NDVI_047, data=dataset, na.action=na.exclude)
     log_model_leaf_NDVI_018 <- lm(log(leaf_biomass) ~ mean_NDVI_018, data=dataset, na.action=na.exclude)
     
-    summary(log_model_total_NDVI_121)
-    summary(log_model_total_NDVI_119)
-    summary(log_model_total_NDVI_047)
-    summary(log_model_total_NDVI_018)
-    summary(log_model_phyto_NDVI_121)
-    summary(log_model_phyto_NDVI_119)
-    summary(log_model_phyto_NDVI_047)
-    summary(log_model_phyto_NDVI_018)
-    summary(log_model_leaf_NDVI_121)
-    summary(log_model_leaf_NDVI_119)
-    summary(log_model_leaf_NDVI_047)
-    summary(log_model_leaf_NDVI_018)
-    
-    # Exoport model summaries as table
-    log_models <- list(    log_model_total_NDVI_121,
-                           log_model_total_NDVI_119,
-                           log_model_total_NDVI_047,
-                           log_model_total_NDVI_018,
-                           log_model_phyto_NDVI_121,
-                           log_model_phyto_NDVI_119,
-                           log_model_phyto_NDVI_047,
-                           log_model_phyto_NDVI_018,
-                           log_model_leaf_NDVI_121,
-                           log_model_leaf_NDVI_119,
-                           log_model_leaf_NDVI_047,
-                           log_model_leaf_NDVI_018)
-    
-    log_model_results <- bind_rows(lapply(log_models, function(model){
-      model_glance <- broom::glance(model)
-      model_tidy <- broom::tidy(model)
-      return(data.frame(ndvi_grain = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
-                        model_form = "ln(Y) = a X + b",
-                        a = paste0(round(model_tidy$estimate[2], 3), " ± ", 
-                                   round(model_tidy$std.error[2], 3)),
-                        b = paste0(round(model_tidy$estimate[1], 3), " ± ", 
-                                   round(model_tidy$std.error[1], 3)),
-                        r2 = round(model_glance$r.squared, 2),
-                        resid = round(model_glance$sigma, 3), stringsAsFactors = F))
-             }))
-    
-    write.csv(log_model_results, file = "tables/table_2_log_model_fits.csv", row.names = F)
+
     
     
 ### Analysis of moss cover effect on NDVI-biomass relationships ####
