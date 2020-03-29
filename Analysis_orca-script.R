@@ -680,7 +680,7 @@ library(miscTools)
                                           font.label = list(size = 11, face = "bold"))
         
         # Export figure
-        png(filename="plots/Figure 4 - NDVI vs biomass - exp.png", width=22, height=13, units="cm", res=400)
+        png(filename="plots/Figure S3 - NDVI vs biomass - exp.png", width=22, height=13, units="cm", res=400)
         plot(NDVI_biomass)
         dev.off()
       }
@@ -895,7 +895,7 @@ library(miscTools)
                                           font.label = list(size = 11, face = "bold"))
         
         # Export figure
-        png(filename="plots/Figure S3 - NDVI vs biomass - log.png", width=22, height=13, units="cm", res=400)
+        png(filename="plots/Figure 4 - NDVI vs biomass - log.png", width=22, height=13, units="cm", res=400)
         plot(NDVI_biomass)
         dev.off()
       }
@@ -957,6 +957,28 @@ library(miscTools)
       
       
       
+      
+### Figure 6. Analysis of moss cover effect on NDVI-biomass relationships ####
+      # Looking at the inteaction between the proportion of moss cover ('moss_prop') with NDVI and Biomass.
+      # The coefficient of that interaction effect indicates how moss_prop influences the phytomass/NDVI relationship.
+      
+      # Check the distribution of phytomass. Suggests phytomass should be transformed to normalise the distribution.
+      hist(dataset$phytomass)
+      hist(log(dataset$phytomass))
+      
+      model3 <- lm(phytomass ~ mean_NDVI_121*moss_prop, data = dataset)
+      summary(model3)
+      
+      # It is easier to interpret an interaction with a graph
+      interaction_NDVI_moss <- ggpredict(model3, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding()
+      # The interaction effect is for two continuous variables (NDVI and moss prop), but for the sake
+      # of visualisation, ggpredict() takes the second continuous variable and splits it into three levels
+      # so it's like low, medium and high moss cover.
+      
+      # Export plot
+      png(filename = "plots/Figure 6 - interaction between Moss and NDVI.png", width = 10, height = 10, units = "cm", res = 400)
+      plot(interaction_NDVI_moss)
+      dev.off()
       
 
 
@@ -1033,27 +1055,5 @@ dev.off()
     dev.off()
 
     
-    
-### Figure S4. Analysis of moss cover effect on NDVI-biomass relationships ####
-  # Looking at the inteaction between the proportion of moss cover ('moss_prop') with NDVI and Biomass.
-  # The coefficient of that interaction effect indicates how moss_prop influences the phytomass/NDVI relationship.
-    
-    # Check the distribution of phytomass. Suggests phytomass should be transformed to normalise the distribution.
-    hist(dataset$phytomass)
-    hist(log(dataset$phytomass))
-    
-    model3 <- lm(phytomass ~ mean_NDVI_121*moss_prop, data = dataset)
-    summary(model3)
-    
-    # It is easier to interpret an interaction with a graph
-    interaction_NDVI_moss <- ggpredict(model3, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding()
-    # The interaction effect is for two continuous variables (NDVI and moss prop), but for the sake
-    # of visualisation, ggpredict() takes the second continuous variable and splits it into three levels
-    # so it's like low, medium and high moss cover.
-    
-    # Export plot
-    png(filename = "plots/Figure S4 - interaction between Moss and NDVI.png", width = 10, height = 10, units = "cm", res = 400)
-    plot(interaction_NDVI_moss)
-    dev.off()
-    
+  
     
