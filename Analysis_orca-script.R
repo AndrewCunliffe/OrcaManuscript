@@ -63,6 +63,9 @@ library(miscTools)
     dataset <- read.csv("data/main_database.csv", header = T)                     # Read in summary  data
     PF_observations <- read.csv("data/point_framing_observations.csv")            # Read in canopy height from point framing
 
+# Compute averge NDVI across the four rasters
+    dataset$NDVImeans <- rowMeans(subset(dataset, select = c(mean_NDVI_018, mean_NDVI_047, mean_NDVI_119, mean_NDVI_121), na.rm = TRUE))
+    dataset$NDVImedians <-rowMedians(subset(dataset, select = c(mean_NDVI_018, mean_NDVI_047, mean_NDVI_119, mean_NDVI_121), na.rm = TRUE))
 
 # Extract solar angles for the surveys
     datetime_UTC <- as.character(loc_time_data$datetime_UTC)
@@ -565,6 +568,7 @@ library(miscTools)
           theme_coding() +
           theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
         
+        
         # Photosynthetic biomass
         NDVI_vs_phyto_biomass_121 <- ggplot(data = dataset, aes(x = mean_NDVI_121,  y = phytomass)) + 
           geom_point(shape = 1, na.rm = TRUE) +
@@ -685,6 +689,31 @@ library(miscTools)
         dev.off()
       }
       
+      
+### Exploration of average NDVI
+      (NDVImedians_vs_total_biomass <- ggplot(data = dataset, aes(x = NDVImedians, y = log(AGB_spatially_normalised_g_m2))) + 
+        geom_point(shape = 1, na.rm = TRUE) +
+        geom_text(aes(label=PlotID),hjust=0, vjust=0) +
+        labs(
+          # x = expression("median mean NDVI"),
+          x = expression(""),
+          y = expression(atop("ln (Total", paste ("biomass (g m"^"-2"*"))"))),
+          title = "median NDVI value across grains") +
+        geom_smooth(method='lm', formula= y~x, se=TRUE, size = 1, lty = "solid", col="black") +
+        coord_cartesian(ylim = c(min_agb_log, max_agb_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+        theme_coding() +
+        theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt")))
+      
+      (NDVImedians_vs_leaf_biomass <- ggplot(data = dataset, aes(x = NDVImedians, y = log(leaf_biomass))) + 
+        geom_point(shape = 1, na.rm = TRUE) +
+        geom_text(aes(label=PlotID),hjust=0, vjust=0) +
+        labs(x = expression("NDVI"),
+             y = expression("")
+        ) +
+        geom_smooth(method='lm', formula= y~x, se=TRUE, size = 1, lty = "solid", col="black") +
+        coord_cartesian(ylim = c(3, 5.5), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
+        theme_coding() +
+        theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt")))
       
       
       
@@ -966,20 +995,45 @@ library(miscTools)
       hist(dataset$phytomass)
       hist(log(dataset$phytomass))
       
-      model3 <- lm(phytomass ~ mean_NDVI_121*moss_prop, data = dataset)
-      summary(model3)
+      model121 <- lm(phytomass ~ mean_NDVI_121*moss_prop, data = dataset)
+      model119 <- lm(phytomass ~ mean_NDVI_119*moss_prop, data = dataset)
+      model047 <- lm(phytomass ~ mean_NDVI_047*moss_prop, data = dataset)
+      model018 <- lm(phytomass ~ mean_NDVI_018*moss_prop, data = dataset)
+      summary(model121)
+      summary(model119)
+      summary(model047)
+      summary(model018)
       
-      # It is easier to interpret an interaction with a graph
-      interaction_NDVI_moss <- ggpredict(model3, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding()
-      # The interaction effect is for two continuous variables (NDVI and moss prop), but for the sake
-      # of visualisation, ggpredict() takes the second continuous variable and splits it into three levels
-      # so it's like low, medium and high moss cover.
+      # Visualising the moss interaction
+      # The interaction effect is for two continuous variables (NDVI and moss prop),
+      # but for the sake of visualisation, ggpredict() takes the second continuous 
+      # variable and automatically splits it into three levels () low, medium and 
+      # high moss cover.
+      (interaction_NDVI121_moss <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding())
+      (interaction_NDVI119_moss <- ggpredict(model119, terms = c("mean_NDVI_119", "moss_prop")) %>% plot() + theme_coding())
+      (interaction_NDVI047_moss <- ggpredict(model047, terms = c("mean_NDVI_047", "moss_prop")) %>% plot() + theme_coding())
+      (interaction_NDVI018_moss <- ggpredict(model018, terms = c("mean_NDVI_018", "moss_prop")) %>% plot() + theme_coding())
+
       
       # Export plot
-      png(filename = "plots/Figure 6 - interaction between Moss and NDVI.png", width = 10, height = 10, units = "cm", res = 400)
-      plot(interaction_NDVI_moss)
+      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 121.png", width = 10, height = 10, units = "cm", res = 400)
+      plot(interaction_NDVI121_moss)
       dev.off()
       
+      # Export plot
+      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 119.png", width = 10, height = 10, units = "cm", res = 400)
+      plot(interaction_NDVI119_moss)
+      dev.off()
+      
+      # Export plot
+      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 047.png", width = 10, height = 10, units = "cm", res = 400)
+      plot(interaction_NDVI047_moss)
+      dev.off()
+      
+      # Export plot
+      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 018.png", width = 10, height = 10, units = "cm", res = 400)
+      plot(interaction_NDVI018_moss)
+      dev.off()
 
 
 # Figure S1. Boxplot of canopy height observations ---- 
@@ -1019,12 +1073,6 @@ library(miscTools)
 png(filename = "plots/Figure S1 - Height boxplot.png", width = 16, height = 11, units = "cm", res = 400)
 plot(HAG_boxplot)
 dev.off()
-
-
-### Figure S2. Effect of moss on NDVI-Biomass relationship ####
-# What is the effect of moss_prop on the NDVI-biomass relationships?
-
-
 
 
 
