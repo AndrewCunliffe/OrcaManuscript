@@ -1014,6 +1014,41 @@ library(miscTools)
       (interaction_NDVI047_moss <- ggpredict(model047, terms = c("mean_NDVI_047", "moss_prop")) %>% plot() + theme_coding())
       (interaction_NDVI018_moss <- ggpredict(model018, terms = c("mean_NDVI_018", "moss_prop")) %>% plot() + theme_coding())
 
+      # Making a new theme so that the legend is better placed
+      theme_coding2 <- function(){
+        theme_bw()+
+          theme(axis.text = element_text(size = 8),
+                axis.text.x = element_text(angle = 0, vjust = 1, hjust = 0.5),
+                axis.title = element_text(size = 10),
+                panel.grid = element_blank(),
+                plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
+                plot.title = element_text(size = 12, vjust = 1, hjust = 0.5),
+                legend.title = element_blank(),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = c(0.1, 0.9))
+      }
+      # Note from Gergana:
+      # If you want to use ggpredict versus ggPredict that I use below, you can set the levels like this:
+       predictions <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop[0.25, 0.50, 0.90]"))
+       
+       (moss_int_graph <- ggplot() +
+         geom_line(data = predictions, aes(x = x, y = predicted, colour = group),
+                   size = 1) + 
+         geom_ribbon(data = predictions, aes(x = x, ymin = conf.low, ymax = conf.high,
+                                             fill = group), alpha = 0.2) +
+         theme_coding2() +
+         labs(x = "\nMean NDVI", 
+              y = expression(atop("Photosynthetic", paste ("biomass (g m"^"-2"*")")))) +
+         scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+         scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8) +
+           geom_point(data = dataset, aes(x = mean_NDVI_121, y = phytomass), alpha = 0.4))
+      
+      # Another way to do the same if you're interested
+      devtools::install_github("cardiomoon/ggiraphExtra")
+      library(ggiraphExtra)
+      ggPredict(model121) + theme_coding()
       
       # Export plot
       png(filename = "plots/Figure 6 - interaction between Moss and NDVI 121.png", width = 10, height = 10, units = "cm", res = 400)
