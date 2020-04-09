@@ -574,7 +574,7 @@ library(miscTools)
           geom_point(shape = 1, na.rm = TRUE) +
           labs(
             x = expression(""),
-            y = expression(atop("(Photosynthetic", paste ("biomass (g m"^"-2"*")")))) +
+            y = expression("Phytomass (g m"^"-2"*")")) +
           stat_function(fun = function(x) (coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[1]*exp((coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[2]*x),
                         aes(), size = 1, lty = "solid") +
           coord_cartesian(ylim = c(0, phyto_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
@@ -817,12 +817,12 @@ library(miscTools)
           theme_coding() +
           theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
         
-        # Photosynthetic biomass
+        # Phytomass biomass
         NDVI_vs_phyto_biomass_121 <- ggplot(data = dataset, aes(x = mean_NDVI_121,  y = log(phytomass))) + 
           geom_point(shape = 1, na.rm = TRUE) +
           labs(
             x = expression(""),
-            y = expression(atop("ln (Photosynthetic", paste ("biomass (g m"^"-2"*"))")))) +
+            y = expression(atop("ln (Phytomass", paste("(g m"^"-2"*"))")))) +
           geom_smooth(method='lm', formula= y~x, se=TRUE, size = 1, lty = "solid", col="black") +
           coord_cartesian(ylim = c(phyto_biomass_min_log, phyto_biomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
           theme_coding() +
@@ -945,7 +945,7 @@ library(miscTools)
          stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                       formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
                       label.x.npc = 0.95, label.y.npc = 0.95) +
-         geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+         geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE, colour = "black"))
       
     # Create plot
       (leafmass_biomass <- ggplot(data = dataset,
@@ -960,7 +960,7 @@ library(miscTools)
           stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                        formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
                        label.x.npc = 0.05, label.y.npc = 0.95) +
-          geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+          geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE, colour = "black"))
       
     # Combine plots
       combined_biomass_parts <- ggpubr::ggarrange(leafmass_biomass, phytomass_biomass,
