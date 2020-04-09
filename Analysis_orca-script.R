@@ -1023,7 +1023,6 @@ library(miscTools)
                 panel.grid = element_blank(),
                 plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
                 plot.title = element_text(size = 12, vjust = 1, hjust = 0.5),
-                legend.title = element_blank(),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1040,7 +1039,8 @@ library(miscTools)
                                              fill = group), alpha = 0.2) +
          theme_coding2() +
          labs(x = "\nMean NDVI", 
-              y = expression(atop("Photosynthetic", paste ("biomass (g m"^"-2"*")")))) +
+              y = expression(atop("Photosynthetic", paste ("biomass (g m"^"-2"*")"))),
+              fill = "Moss cover", colour = "Moss cover") +
          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8) +
            geom_point(data = dataset, aes(x = mean_NDVI_121, y = phytomass), alpha = 0.4))
