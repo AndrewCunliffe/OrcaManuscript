@@ -574,7 +574,7 @@ library(miscTools)
           geom_point(shape = 1, na.rm = TRUE) +
           labs(
             x = expression(""),
-            y = expression("Phytomass (g m"^"-2"*")")) +
+            y = expression(atop("Phytomass", paste("(g m"^"-2"*")")))) +
           stat_function(fun = function(x) (coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[1]*exp((coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[2]*x),
                         aes(), size = 1, lty = "solid") +
           coord_cartesian(ylim = c(0, phyto_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
@@ -928,6 +928,7 @@ library(miscTools)
         plot(NDVI_biomass)
         dev.off()
       }
+      
       
       
       
