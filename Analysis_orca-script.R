@@ -61,7 +61,7 @@ library(miscTools)
 #### Load Data ----
     loc_time_data <- read.csv("data/location_time_for_suncalc.csv", header = T)         # Read in locations and survey times for the suncalc
     dataset <- read.csv("data/main_database.csv", header = T)                     # Read in summary  data
-    PF_observations <- read.csv("data/point_framing_observations.csv")            # Read in canopy height from point framing
+    PF_observations <- read.csv("data/point_framing_observations.csv")            # Read in canopy height from point intercept
 
 # Compute averge NDVI across the four rasters
     dataset$NDVImeans <- rowMeans(subset(dataset, select = c(mean_NDVI_018, mean_NDVI_047, mean_NDVI_119, mean_NDVI_121), na.rm = TRUE))
@@ -80,7 +80,7 @@ library(miscTools)
 
 
 #### Data Preparation ----
-    # Point framing observations
+    # Point intercept observations
     # Pointframe data - Extracting only Height and PlotN from the pointframe data, and omit NAs
     PF_observations2 <- dplyr::select(PF_observations, Height, PlotN) %>%
       na.omit(PF_observations)
@@ -107,7 +107,7 @@ library(miscTools)
     # Remove unwanted/erronious individual height.
     PF_HAG_summary <- subset(PF_HAG_summary, select = -Height)
     
-    # Add point framing HAGs into main dataframe
+    # Add point intercept heights into main dataframe
     dataset$PF_HAG_min <- PF_HAG_summary$min
     dataset$PF_HAG_max <- PF_HAG_summary$max
     dataset$PF_HAG_median <- PF_HAG_summary$median
@@ -267,7 +267,7 @@ library(miscTools)
       HAG_bias_mean_SD
       
   # Visualistation (Figure 2)
-    # mean point framing canopy height versus mean structure-from-motion canopy height
+    # mean point intercept canopy height versus mean structure-from-motion canopy height
     # Create plot
       {
     (Canopy_heights_plot <- ggplot(data = dataset,
@@ -306,9 +306,9 @@ library(miscTools)
 
       
 #### Predictors of biomass (height and NDVI) ---- 
-  # Testing canopy height (from point framing and photogrammetry) and NDVI as predictors of biomass.
+  # Testing canopy height (from point intercept and photogrammetry) and NDVI as predictors of biomass.
   # Analysis
-    # Point framing    
+    # Point intercept    
       model_PFu <- lm(AGB_spatially_normalised_g_m2 ~ PF_HAG_mean, data=dataset)  # Unconstrained intercept
       model_PF <- lm(AGB_spatially_normalised_g_m2 ~ PF_HAG_mean + 0, data=dataset)  # constrained intercept
       model_SfMu <- lm(AGB_spatially_normalised_g_m2 ~ HAG_plotmean_of_cellmax_m, data=dataset)  # unconstrained intercept
@@ -410,7 +410,7 @@ library(miscTools)
           coord_cartesian(ylim = c(0, 3000), xlim = c(0, 1), expand=FALSE) +
           labs(x = expression("Canopy height (m)"),
                y = expression("Dry biomass (g m"^"-2"*")"),
-               title = "Point Framing") +
+               title = "Point Intercept") +
           stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                        formula = y ~ x-1, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
                        label.x.npc = 0.03, label.y.npc = 0.99) +
@@ -574,7 +574,7 @@ library(miscTools)
           geom_point(shape = 1, na.rm = TRUE) +
           labs(
             x = expression(""),
-            y = expression(atop("(Photosynthetic", paste ("biomass (g m"^"-2"*")")))) +
+            y = expression(atop("Phytomass", paste("(g m"^"-2"*")")))) +
           stat_function(fun = function(x) (coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[1]*exp((coef(summary(exp_model_phyto_NDVI_121))[, "Estimate"])[2]*x),
                         aes(), size = 1, lty = "solid") +
           coord_cartesian(ylim = c(0, phyto_biomass_max), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
@@ -817,12 +817,12 @@ library(miscTools)
           theme_coding() +
           theme(plot.margin = margin(t = spacing, r = spacing, b = spacing, l = spacing, unit = "pt"))
         
-        # Photosynthetic biomass
+        # Phytomass biomass
         NDVI_vs_phyto_biomass_121 <- ggplot(data = dataset, aes(x = mean_NDVI_121,  y = log(phytomass))) + 
           geom_point(shape = 1, na.rm = TRUE) +
           labs(
             x = expression(""),
-            y = expression(atop("ln (Photosynthetic", paste ("biomass (g m"^"-2"*"))")))) +
+            y = expression(atop("ln (Phytomass", paste("(g m"^"-2"*"))")))) +
           geom_smooth(method='lm', formula= y~x, se=TRUE, size = 1, lty = "solid", col="black") +
           coord_cartesian(ylim = c(phyto_biomass_min_log, phyto_biomass_max_log), xlim = c(min_ndvi, max_ndvi), expand=FALSE) +
           theme_coding() +
@@ -931,6 +931,7 @@ library(miscTools)
       
       
       
+      
 # Figure 5. Leaf mass & Phytomass as predictors of biomass ----
   # Create plot
       (phytomass_biomass <- ggplot(data = dataset,
@@ -945,7 +946,7 @@ library(miscTools)
          stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                       formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
                       label.x.npc = 0.95, label.y.npc = 0.95) +
-         geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+         geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE, colour = "black"))
       
     # Create plot
       (leafmass_biomass <- ggplot(data = dataset,
@@ -960,7 +961,7 @@ library(miscTools)
           stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                        formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
                        label.x.npc = 0.05, label.y.npc = 0.95) +
-          geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+          geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE, colour = "black"))
       
     # Combine plots
       combined_biomass_parts <- ggpubr::ggarrange(leafmass_biomass, phytomass_biomass,
