@@ -1043,13 +1043,18 @@ library(miscTools)
               y = expression(atop("Photosynthetic", paste ("biomass (g m"^"-2"*")"))),
               fill = "Moss cover", colour = "Moss cover") +
          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
-         scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8) +
-           geom_point(data = dataset, aes(x = mean_NDVI_121, y = phytomass), alpha = 0.4))
+        # geom_point(data = dataset, aes(x = mean_NDVI_121, y = phytomass), alpha = 0.4) +
+         scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+       )
       
       # Another way to do the same if you're interested
       devtools::install_github("cardiomoon/ggiraphExtra")
       library(ggiraphExtra)
       ggPredict(model121) + theme_coding()
+      ggPredict(model121) + theme_coding()
+      ggPredict(model121) + theme_coding()
+      ggPredict(model121) + theme_coding()
+      
       
       # Export plot
       png(filename = "plots/Figure 6 - interaction between Moss and NDVI 121.png", width = 10, height = 10, units = "cm", res = 400)
@@ -1072,6 +1077,8 @@ library(miscTools)
       dev.off()
 
 
+      
+      
 # Figure S1. Boxplot of canopy height observations ---- 
 # Create boxplot
 (HAG_boxplot <- ggplot(data = dataset_long,
