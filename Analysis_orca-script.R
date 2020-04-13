@@ -992,91 +992,390 @@ library(miscTools)
       # Looking at the inteaction between the proportion of moss cover ('moss_prop') with NDVI and Biomass.
       # The coefficient of that interaction effect indicates how moss_prop influences the phytomass/NDVI relationship.
       
-      # Check the distribution of phytomass. Suggests phytomass should be transformed to normalise the distribution.
+      # Check the distribution of phytomass. Suggests phytomass should be transformed to normalise the distribution. But that leaf and total biomass are better without normalisation.
       hist(dataset$phytomass)
       hist(log(dataset$phytomass))
+      hist(dataset$leaf_biomass)
+      hist(log(dataset$leaf_biomass))
+      hist(dataset$AGB_spatially_normalised_g_m2)
+      hist(log(dataset$AGB_spatially_normalised_g_m2))
       
-      model121 <- lm(phytomass ~ mean_NDVI_121*moss_prop, data = dataset)
-      model119 <- lm(phytomass ~ mean_NDVI_119*moss_prop, data = dataset)
-      model047 <- lm(phytomass ~ mean_NDVI_047*moss_prop, data = dataset)
-      model018 <- lm(phytomass ~ mean_NDVI_018*moss_prop, data = dataset)
-      summary(model121)
-      summary(model119)
-      summary(model047)
-      summary(model018)
+      {
+      # Create models
+      mod_biomass_121 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_121*moss_prop, data = dataset)
+      mod_biomass_119 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_119*moss_prop, data = dataset)
+      mod_biomass_047 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_047*moss_prop, data = dataset)
+      mod_biomass_018 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_018*moss_prop, data = dataset)
+      
+      mod_phytomass_121 <- lm(phytomass ~ mean_NDVI_121*moss_prop, data = dataset)
+      mod_phytomass_119 <- lm(phytomass ~ mean_NDVI_119*moss_prop, data = dataset)
+      mod_phytomass_047 <- lm(phytomass ~ mean_NDVI_047*moss_prop, data = dataset)
+      mod_phytomass_018 <- lm(phytomass ~ mean_NDVI_018*moss_prop, data = dataset)
+      
+      mod_leafmass_121 <- lm(leaf_biomass ~ mean_NDVI_121*moss_prop, data = dataset)
+      mod_leafmass_119 <- lm(leaf_biomass ~ mean_NDVI_119*moss_prop, data = dataset)
+      mod_leafmass_047 <- lm(leaf_biomass ~ mean_NDVI_047*moss_prop, data = dataset)
+      mod_leafmass_018 <- lm(leaf_biomass ~ mean_NDVI_018*moss_prop, data = dataset)
+      
+      
+      summary(mod_biomass_121)
+      summary(mod_biomass_119)
+      summary(mod_biomass_047)
+      summary(mod_biomass_018)
+      
+      summary(mod_phytomass_121)
+      summary(mod_phytomass_119)
+      summary(mod_phytomass_047)
+      summary(mod_phytomass_018)
+      
+      summary(mod_leafmass_121)
+      summary(mod_leafmass_119)
+      summary(mod_leafmass_047)
+      summary(mod_leafmass_018)
+      
       
       # Visualising the moss interaction
-      # The interaction effect is for two continuous variables (NDVI and moss prop),
-      # but for the sake of visualisation, ggpredict() takes the second continuous 
-      # variable and automatically splits it into three levels () low, medium and 
-      # high moss cover.
-      (interaction_NDVI121_moss <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding())
-      (interaction_NDVI119_moss <- ggpredict(model119, terms = c("mean_NDVI_119", "moss_prop")) %>% plot() + theme_coding())
-      (interaction_NDVI047_moss <- ggpredict(model047, terms = c("mean_NDVI_047", "moss_prop")) %>% plot() + theme_coding())
-      (interaction_NDVI018_moss <- ggpredict(model018, terms = c("mean_NDVI_018", "moss_prop")) %>% plot() + theme_coding())
+      # The interaction effect is for two continuous variables (NDVI and moss prop), but for the sake of visualisation, ggpredict() takes the second continuous variable and  splits it into three levels of moss cover
+      moss_levels <- "moss_prop[0.25, 0.50, 0.90]"  # set levels
+      legend_loc <- c(0.2, 0.9)
 
-      # Making a new theme so that the legend is better placed
-      theme_coding2 <- function(){
-        theme_bw()+
-          theme(axis.text = element_text(size = 8),
-                axis.text.x = element_text(angle = 0, vjust = 1, hjust = 0.5),
-                axis.title = element_text(size = 10),
-                panel.grid = element_blank(),
-                plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
-                plot.title = element_text(size = 12, vjust = 1, hjust = 0.5),
+      preds_biomass_121 <- ggpredict(mod_biomass_121, terms = c("mean_NDVI_121", moss_levels))
+      preds_biomass_119 <- ggpredict(mod_biomass_119, terms = c("mean_NDVI_119", moss_levels))
+      preds_biomass_047 <- ggpredict(mod_biomass_047, terms = c("mean_NDVI_047", moss_levels))
+      preds_biomass_018 <- ggpredict(mod_biomass_018, terms = c("mean_NDVI_018", moss_levels))
+      
+      preds_phytomass_121 <- ggpredict(mod_phytomass_121, terms = c("mean_NDVI_121", moss_levels))
+      preds_phytomass_119 <- ggpredict(mod_phytomass_119, terms = c("mean_NDVI_119", moss_levels))
+      preds_phytomass_047 <- ggpredict(mod_phytomass_047, terms = c("mean_NDVI_047", moss_levels))
+      preds_phytomass_018 <- ggpredict(mod_phytomass_018, terms = c("mean_NDVI_018", moss_levels))
+
+      preds_leafmass_121 <- ggpredict(mod_leafmass_121, terms = c("mean_NDVI_121", moss_levels))
+      preds_leafmass_119 <- ggpredict(mod_leafmass_119, terms = c("mean_NDVI_119", moss_levels))
+      preds_leafmass_047 <- ggpredict(mod_leafmass_047, terms = c("mean_NDVI_047", moss_levels))
+      preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", moss_levels))
+      
+      # Visualisations
+      # Biomass
+      (plot_biomass_121 <- ggplot() +
+          geom_line(data = preds_biomass_121, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_biomass_121, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
-                legend.position = c(0.1, 0.9))
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.121 m)", 
+               y = expression("Biomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+        )
+      
+      (plot_biomass_119 <- ggplot() +
+          geom_line(data = preds_biomass_119, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_biomass_119, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.191 m)", 
+               y = expression("Biomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      (plot_biomass_047 <- ggplot() +
+          geom_line(data = preds_biomass_047, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_biomass_047, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.047 m)", 
+               y = expression("Biomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      (plot_biomass_018 <- ggplot() +
+          geom_line(data = preds_biomass_018, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_biomass_018, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.018 m)", 
+               y = expression("Biomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      
+      # Phytomass
+      (plot_phytomass_121 <- ggplot() +
+          geom_line(data = preds_phytomass_121, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_phytomass_121, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.121 m)", 
+               y = expression("Phytomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      (plot_phytomass_119 <- ggplot() +
+          geom_line(data = preds_phytomass_119, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_phytomass_119, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.191 m)", 
+               y = expression("Phytomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      (plot_phytomass_047 <- ggplot() +
+          geom_line(data = preds_phytomass_047, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_phytomass_047, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.047 m)", 
+               y = expression("Phytomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      (plot_phytomass_018 <- ggplot() +
+          geom_line(data = preds_phytomass_018, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_phytomass_018, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.018 m)", 
+               y = expression("Phytomass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      
+      # Leaf biomass
+      (plot_leafmass_121 <- ggplot() +
+          geom_line(data = preds_leafmass_121, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_leafmass_121, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.121 m)", 
+               y = expression("Leaf mass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      (plot_leafmass_119 <- ggplot() +
+          geom_line(data = preds_leafmass_119, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_leafmass_119, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.119 m)", 
+               y = expression("Leaf mass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+
+      (plot_leafmass_047 <- ggplot() +
+          geom_line(data = preds_leafmass_047, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_leafmass_047, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.047 m)", 
+               y = expression("Leaf mass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      (plot_leafmass_018 <- ggplot() +
+          geom_line(data = preds_leafmass_018, aes(x = x, y = predicted, colour = group), size = 1) +
+          geom_ribbon(data = preds_leafmass_018, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+          theme_coding() +
+          theme(legend.title = element_text(size = 10),
+                legend.text = element_text(size = 6, face = "italic"),
+                legend.key.size = unit(0.9,"line"),
+                legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+                legend.position = legend_loc) +
+          labs(x = "Mean NDVI (0.018 m)", 
+               y = expression("Leaf mass (g m"^"-2"*")"),
+               fill = "Moss cover", colour = "Moss cover") +
+          scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+          scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      )
+      
+      # Combine plots
+      all_interactions <- ggpubr::ggarrange(plot_biomass_121, plot_biomass_119, plot_biomass_047, plot_biomass_018,
+                                            plot_phytomass_121, plot_phytomass_119, plot_phytomass_047, plot_phytomass_018,
+                                            plot_leafmass_121, plot_leafmass_119, plot_leafmass_047, plot_leafmass_018,
+                                                heights = c(10, 10, 10, 10),
+                                                labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)", "(i)", "(j)", "(k)", "(l)"),
+                                                ncol = 4, nrow = 3,
+                                                align = "h")
+      
+      biomass_interactions <- ggpubr::ggarrange(plot_biomass_121, plot_biomass_119, plot_biomass_047, plot_biomass_018,
+                                         heights = c(10, 10, 10, 10),
+                                         labels = c("(a)", "(b)", "(c)", "(d)"),
+                                         ncol = 4, nrow = 1,
+                                         align = "h")
+      
+      phytomass_interactions <- ggpubr::ggarrange(plot_phytomass_121, plot_phytomass_119, plot_phytomass_047, plot_phytomass_018,
+                                                heights = c(10, 10, 10, 10),
+                                                labels = c("(a)", "(b)", "(c)", "(d)"),
+                                                ncol = 4, nrow = 1,
+                                                align = "h")
+      
+      leafmass_interactions <- ggpubr::ggarrange(plot_leafmass_121, plot_leafmass_119, plot_leafmass_047, plot_leafmass_018,
+                                                heights = c(10, 10, 10, 10),
+                                                labels = c("(a)", "(b)", "(c)", "(d)"),
+                                                ncol = 4, nrow = 1,
+                                                align = "h")
+      
+      # Export figures
+      png(filename="plots/Figure X - all interactions.png", width=30, height=18, units="cm", res=400)
+      plot(all_interactions)
+      dev.off()
+      
+      png(filename="plots/Figure X - Biomass interactions.png", width=20, height=7, units="cm", res=400)
+      plot(biomass_interactions)
+      dev.off()
+      
+      png(filename="plots/Figure X - Phytomass interactions.png", width=20, height=7, units="cm", res=400)
+      plot(phytomass_interactions)
+      dev.off()
+      
+      png(filename="plots/Figure X - Leafmass interactions.png", width=20, height=7, units="cm", res=400)
+      plot(leafmass_interactions)
+      dev.off()
       }
-      # Note from Gergana:
-      # If you want to use ggpredict versus ggPredict that I use below, you can set the levels like this:
-       predictions <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop[0.25, 0.50, 0.90]"))
-       
-       (moss_int_graph <- ggplot() +
-         geom_line(data = predictions, aes(x = x, y = predicted, colour = group),
-                   size = 1) + 
-         geom_ribbon(data = predictions, aes(x = x, ymin = conf.low, ymax = conf.high,
-                                             fill = group), alpha = 0.2) +
-         theme_coding2() +
-         labs(x = "\nMean NDVI", 
-              y = expression(atop("Photosynthetic", paste ("biomass (g m"^"-2"*")"))),
-              fill = "Moss cover", colour = "Moss cover") +
-         scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
-        # geom_point(data = dataset, aes(x = mean_NDVI_121, y = phytomass), alpha = 0.4) +
-         scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
-       )
-      
-      # Another way to do the same if you're interested
-      devtools::install_github("cardiomoon/ggiraphExtra")
-      library(ggiraphExtra)
-      ggPredict(model121) + theme_coding()
-      ggPredict(model121) + theme_coding()
-      ggPredict(model121) + theme_coding()
-      ggPredict(model121) + theme_coding()
       
       
-      # Export plot
-      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 121.png", width = 10, height = 10, units = "cm", res = 400)
-      plot(interaction_NDVI121_moss)
-      dev.off()
       
-      # Export plot
-      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 119.png", width = 10, height = 10, units = "cm", res = 400)
-      plot(interaction_NDVI119_moss)
-      dev.off()
       
-      # Export plot
-      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 047.png", width = 10, height = 10, units = "cm", res = 400)
-      plot(interaction_NDVI047_moss)
-      dev.off()
-      
-      # Export plot
-      png(filename = "plots/Figure 6 - interaction between Moss and NDVI 018.png", width = 10, height = 10, units = "cm", res = 400)
-      plot(interaction_NDVI018_moss)
-      dev.off()
+      # predictions <- ggpredict(mod_phytomass_121, terms = c("mean_NDVI_121", moss_levels))
+      # 
+      # Old (ugly) plots
+      # (interaction_NDVI121_moss <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding())
+      # (interaction_NDVI119_moss <- ggpredict(model119, terms = c("mean_NDVI_119", "moss_prop")) %>% plot() + theme_coding())
+      # (interaction_NDVI047_moss <- ggpredict(model047, terms = c("mean_NDVI_047", "moss_prop")) %>% plot() + theme_coding())
+      # (interaction_NDVI018_moss <- ggpredict(model018, terms = c("mean_NDVI_018", "moss_prop")) %>% plot() + theme_coding())
+
+      # Making a new theme so that the legend is better placed
+      # theme_coding2 <- function(){
+      #   theme_bw()+
+      #     theme(axis.text = element_text(size = 8),
+      #           axis.text.x = element_text(angle = 0, vjust = 1, hjust = 0.5),
+      #           axis.title = element_text(size = 10),
+      #           panel.grid = element_blank(),
+      #           plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
+      #           plot.title = element_text(size = 12, vjust = 1, hjust = 0.5),
+      #           legend.text = element_text(size = 6, face = "italic"),
+      #           legend.key.size = unit(0.9,"line"),
+      #           legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
+      #           legend.position = c(0.1, 0.9))
+      # }
+      # 
+      # # Set levels for ggpredict:
+      #  predictions <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop[0.25, 0.50, 0.90]"))
+      #  
+      #  
+      #  
+      #  (moss_int_graph <- ggplot() +
+      #    geom_line(data = predictions, aes(x = x, y = predicted, colour = group),
+      #              size = 1) + 
+      #    geom_ribbon(data = predictions, aes(x = x, ymin = conf.low, ymax = conf.high,
+      #                                        fill = group), alpha = 0.2) +
+      #      theme_coding() +
+      #      # theme_coding2() +
+      #      labs(x = "\nMean NDVI", 
+      #         y = expression("Phytomass (g m"^"-2"*")"),
+      #         fill = "Moss cover", colour = "Moss cover") +
+      #    scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
+      #   # geom_point(data = dataset, aes(x = mean_NDVI_121, y = phytomass), alpha = 0.4) +
+      #    scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
+      #  )
+      # 
+      # 
+      # # Alternative visualisation of moss interaction
+      # devtools::install_github("cardiomoon/ggiraphExtra")
+      # library(ggiraphExtra)
+      # ggPredict(model121) + theme_coding()
+      # ggPredict(model121) + theme_coding()
+      # ggPredict(model121) + theme_coding()
+      # ggPredict(model121) + theme_coding()
+      # 
+      # 
+      # # Export plot
+      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 121.png", width = 10, height = 10, units = "cm", res = 400)
+      # plot(interaction_NDVI121_moss)
+      # dev.off()
+      # 
+      # # Export plot
+      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 119.png", width = 10, height = 10, units = "cm", res = 400)
+      # plot(interaction_NDVI119_moss)
+      # dev.off()
+      # 
+      # # Export plot
+      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 047.png", width = 10, height = 10, units = "cm", res = 400)
+      # plot(interaction_NDVI047_moss)
+      # dev.off()
+      # 
+      # # Export plot
+      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 018.png", width = 10, height = 10, units = "cm", res = 400)
+      # plot(interaction_NDVI018_moss)
+      # dev.off()
 
 
+      
+      
       
       
 # Figure S1. Boxplot of canopy height observations ---- 
