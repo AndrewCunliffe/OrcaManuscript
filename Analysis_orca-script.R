@@ -240,7 +240,6 @@ library(miscTools)
     min_agb_log <- floor(min(log(dataset$AGB_spatially_normalised_g_m2)))*0.9
     
     
-#### Data Analysis ----
 #### Comparison of canopy height measurements ----    
   # Analysis
     # Concordence correlation coefficient
@@ -432,22 +431,7 @@ library(miscTools)
           theme(legend.position = c(0.15, 0.9)) +
           geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
       
-      # ln version
-      # (biomass_NDVI <- ggplot(data = dataset,
-      #                         aes(x = mean_NDVI_121,
-      #                             y = log(AGB_spatially_normalised_g_m2))) + 
-      #     geom_point(shape = 1, na.rm = TRUE) +
-      #     theme_coding() +
-      #     coord_cartesian(ylim = c(4.5, log(5000)), xlim = c(0.65, 0.85), expand=FALSE) +
-      #     labs(x = expression("NDVI (0.121 m grain)"),
-      #          y = expression("ln ( Dry biomass (g m"^"-2"*"))"),
-      #          title = "NDVI") +
-      #     stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
-      #                  formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
-      #                  label.x.npc = 0.03, label.y.npc = 0.99) +
-      #     theme(legend.position = c(0.15, 0.9)) +
-      #     geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
-      
+
       # Combine plots
       biomass_plots <- ggpubr::ggarrange(biomass_CH_PF, biomass_CH_SfM, biomass_NDVI,
                                          heights = c(10,10,10),
@@ -941,8 +925,7 @@ library(miscTools)
          theme_coding() +
          coord_cartesian(ylim = c(0, max_agb), xlim = c(0, 600), expand=FALSE) +
          labs(x = expression("Phytomass (g m"^"-2"*")"),
-              y = expression("Biomass (g m"^"-2"*")"),
-              title = "Phytomass - Biomass") +
+              y = expression("Total Biomass (g m"^"-2"*")")) +
          stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                       formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
                       label.x.npc = 0.95, label.y.npc = 0.95) +
@@ -956,8 +939,7 @@ library(miscTools)
           theme_coding() +
           coord_cartesian(ylim = c(0, max_agb), xlim = c(0, 150), expand=FALSE) +
           labs(x = expression("Shrub leaf biomass (g m"^"-2"*")"),
-               y = expression("Biomass (g m"^"-2"*")"),
-               title = "Shrub leaf biomass - Biomass") +
+               y = expression("Total Biomass (g m"^"-2"*")")) +
           stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                        formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 3, parse = TRUE,
                        label.x.npc = 0.05, label.y.npc = 0.95) +
@@ -979,7 +961,6 @@ library(miscTools)
       
       
       
-  # Proportion of phytomass that are herbacious 
       dataset$herb_prop <- dataset$herbacious_biomas / dataset$phytomass
       hist(dataset$herb_prop)
       summary(dataset$herb_prop)    
@@ -993,6 +974,7 @@ library(miscTools)
       # The coefficient of that interaction effect indicates how moss_prop influences the phytomass/NDVI relationship.
       
       # Check the distribution of phytomass. Suggests phytomass should be transformed to normalise the distribution. But that leaf and total biomass are better without normalisation.
+      hist(dataset$moss_prop)
       hist(dataset$phytomass)
       hist(log(dataset$phytomass))
       hist(dataset$leaf_biomass)
@@ -1037,7 +1019,7 @@ library(miscTools)
       # Visualising the moss interaction
       # The interaction effect is for two continuous variables (NDVI and moss prop), but for the sake of visualisation, ggpredict() takes the second continuous variable and  splits it into three levels of moss cover
       moss_levels <- "moss_prop[0.25, 0.50, 0.90]"  # set levels
-      legend_loc <- c(0.2, 0.9)
+      legend_loc <- c(0.2, 0.8)
 
       preds_biomass_121 <- ggpredict(mod_biomass_121, terms = c("mean_NDVI_121", moss_levels))
       preds_biomass_119 <- ggpredict(mod_biomass_119, terms = c("mean_NDVI_119", moss_levels))
@@ -1060,7 +1042,7 @@ library(miscTools)
           geom_line(data = preds_biomass_121, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_biomass_121, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1076,12 +1058,12 @@ library(miscTools)
           geom_line(data = preds_biomass_119, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_biomass_119, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
                 legend.position = legend_loc) +
-          labs(x = "Mean NDVI (0.191 m)", 
+          labs(x = "Mean NDVI (0.119 m)", 
                y = expression("Biomass (g m"^"-2"*")"),
                fill = "Moss cover", colour = "Moss cover") +
           scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
@@ -1092,7 +1074,7 @@ library(miscTools)
           geom_line(data = preds_biomass_047, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_biomass_047, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1108,7 +1090,7 @@ library(miscTools)
           geom_line(data = preds_biomass_018, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_biomass_018, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1126,7 +1108,7 @@ library(miscTools)
           geom_line(data = preds_phytomass_121, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_phytomass_121, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1142,12 +1124,12 @@ library(miscTools)
           geom_line(data = preds_phytomass_119, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_phytomass_119, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
                 legend.position = legend_loc) +
-          labs(x = "Mean NDVI (0.191 m)", 
+          labs(x = "Mean NDVI (0.119 m)", 
                y = expression("Phytomass (g m"^"-2"*")"),
                fill = "Moss cover", colour = "Moss cover") +
           scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
@@ -1158,7 +1140,7 @@ library(miscTools)
           geom_line(data = preds_phytomass_047, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_phytomass_047, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1174,7 +1156,7 @@ library(miscTools)
           geom_line(data = preds_phytomass_018, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_phytomass_018, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1192,7 +1174,7 @@ library(miscTools)
           geom_line(data = preds_leafmass_121, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_leafmass_121, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1208,7 +1190,7 @@ library(miscTools)
           geom_line(data = preds_leafmass_119, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_leafmass_119, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1224,7 +1206,7 @@ library(miscTools)
           geom_line(data = preds_leafmass_047, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_leafmass_047, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1240,7 +1222,7 @@ library(miscTools)
           geom_line(data = preds_leafmass_018, aes(x = x, y = predicted, colour = group), size = 1) +
           geom_ribbon(data = preds_leafmass_018, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
           theme_coding() +
-          theme(legend.title = element_text(size = 10),
+          theme(legend.title = element_text(size = 8),
                 legend.text = element_text(size = 6, face = "italic"),
                 legend.key.size = unit(0.9,"line"),
                 legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
@@ -1256,7 +1238,7 @@ library(miscTools)
       all_interactions <- ggpubr::ggarrange(plot_biomass_121, plot_biomass_119, plot_biomass_047, plot_biomass_018,
                                             plot_phytomass_121, plot_phytomass_119, plot_phytomass_047, plot_phytomass_018,
                                             plot_leafmass_121, plot_leafmass_119, plot_leafmass_047, plot_leafmass_018,
-                                                heights = c(10, 10, 10, 10),
+                                                heights = c(12),
                                                 labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)", "(i)", "(j)", "(k)", "(l)"),
                                                 ncol = 4, nrow = 3,
                                                 align = "h")
@@ -1284,17 +1266,17 @@ library(miscTools)
       plot(all_interactions)
       dev.off()
       
-      png(filename="plots/Figure X - Biomass interactions.png", width=20, height=7, units="cm", res=400)
-      plot(biomass_interactions)
-      dev.off()
-      
-      png(filename="plots/Figure X - Phytomass interactions.png", width=20, height=7, units="cm", res=400)
-      plot(phytomass_interactions)
-      dev.off()
-      
-      png(filename="plots/Figure X - Leafmass interactions.png", width=20, height=7, units="cm", res=400)
-      plot(leafmass_interactions)
-      dev.off()
+      # png(filename="plots/Figure X - Biomass interactions.png", width=20, height=7, units="cm", res=400)
+      # plot(biomass_interactions)
+      # dev.off()
+      # 
+      # png(filename="plots/Figure X - Phytomass interactions.png", width=20, height=7, units="cm", res=400)
+      # plot(phytomass_interactions)
+      # dev.off()
+      # 
+      # png(filename="plots/Figure X - Leafmass interactions.png", width=20, height=7, units="cm", res=400)
+      # plot(leafmass_interactions)
+      # dev.off()
       }
       
       
@@ -1420,18 +1402,32 @@ dev.off()
 
 
 # Figure S2. Comparison of mean NDVIs  ----
+  # Boxplot
+    (NDVI_boxplot <- ggplot(data = NDVI_data_long,
+                            aes(x = as.factor(grain),
+                                y = mean_NDVI,
+                                fill = grain)) +
+       geom_boxplot() + 
+       scale_fill_grey(start = 0.3, end = 0.9, aesthetics = "fill") +
+       coord_cartesian(ylim = c(0.6, 0.9)) +
+       labs(x = "Spatial grain",
+            y = expression("Distribution of plot-level mean NDVI"),
+            title = "Comparison of NDVI by spatial grain") +
+       theme_coding() +
+       theme(legend.position="none")
+    )
+
   # Create barplot
     (NDVI_barplot <- ggplot(data = NDVI_data_long,
                             aes(x = reorder(PlotID, mean_NDVI, FUN = "median"),
                                 y = mean_NDVI,
                                 fill = grain)) +
        geom_col(aes(y=mean_NDVI, fill = grain), width=0.75, position = position_dodge2(preserve = "single")) +
-       scale_fill_grey(start = 0.2, end = 0.8, aesthetics = "fill", guide = guide_legend(direction = "horizontal")) +
-       # scale_y_continuous(lim = c(0, 0.9)) +
-       coord_cartesian(ylim = c(0, 0.9), expand=FALSE) +
+       scale_fill_grey(start = 0.3, end = 0.8, aesthetics = "fill", guide = guide_legend(direction = "horizontal")) +
+       coord_cartesian(ylim = c(0.5, 0.9), expand=FALSE) +
        labs(x = "Plot ID", 
             y = expression("mean NDVI"),
-            title = "Comparison of mean NDVI by grain") +
+            title = "Comparison of mean NDVI by plot") +
        theme_coding() +
        theme(legend.position = c(0.19, 0.96), 
              axis.line.x = element_line(color="black", size = 0.5),
@@ -1439,11 +1435,16 @@ dev.off()
              axis.text.x = element_text(angle = 90, vjust = 1, hjust = 0.5))
     )
   
+  # Combine plots
+    NDVI_plots <- ggpubr::ggarrange(NDVI_boxplot, NDVI_barplot,
+                                     heights = c(10, 15),
+                                     labels = c("(a)", "(b)"),
+                                     ncol = 1, nrow = 2,
+                                     align = "h")
+  
   # Export barplot
-    png(filename = "plots/Figure S2 - NDVI comparison.png", width = 16, height = 20, units = "cm", res = 400)
-    plot(NDVI_barplot)
+    png(filename = "plots/Figure S2 - NDVI comparison.png", width = 16, height = 22, units = "cm", res = 400)
+    plot(NDVI_plots)
     dev.off()
 
-    
-  
-    
+   
