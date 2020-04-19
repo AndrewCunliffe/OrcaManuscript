@@ -27,6 +27,7 @@ library(raster)                                                                 
 library(rgdal)
 library(sp)
 library(miscTools)
+library(patchwork)
 
 
 #### Extract NDVI values from rasters ----
@@ -1279,7 +1280,16 @@ library(miscTools)
       # dev.off()
       }
       
+      # Combine plots with patchwork
+      (New_Figure_5 <- leafmass_biomass + phytomass_biomass + plot_phytomass_121 +
+          plot_annotation(tag_levels = 'a', tag_prefix = '(', tag_suffix = ')'))
+
+      # Export figure
+      png(filename="plots/Figure 5 - new.png", width=20, height=8, units="cm", res=400)
+      plot(New_Figure_5)
+      dev.off()
       
+
       
       
       # predictions <- ggpredict(mod_phytomass_121, terms = c("mean_NDVI_121", moss_levels))
