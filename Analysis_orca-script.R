@@ -391,7 +391,7 @@ library(patchwork)
                                     y = AGB_spatially_normalised_g_m2)) + 
          geom_point(shape = 1, na.rm = TRUE) +
          theme_coding() +
-         coord_cartesian(ylim = c(0, 3000), xlim = c(0, 1), expand=FALSE) +
+         coord_cartesian(ylim = c(0, 3000), xlim = c(0, 0.9), expand=FALSE) +
          labs(x = expression("Canopy height (m)"),
               y = expression("Dry biomass (g m"^"-2"*")"),
               title = "SfM") +
@@ -407,7 +407,7 @@ library(patchwork)
                                    y = AGB_spatially_normalised_g_m2)) + 
           geom_point(shape = 1, na.rm = TRUE) +
           theme_coding() +
-          coord_cartesian(ylim = c(0, 3000), xlim = c(0, 1), expand=FALSE) +
+          coord_cartesian(ylim = c(0, 3000), xlim = c(0, 0.9), expand=FALSE) +
           labs(x = expression("Canopy height (m)"),
                y = expression("Dry biomass (g m"^"-2"*")"),
                title = "Point Intercept") +
@@ -419,12 +419,12 @@ library(patchwork)
       
       (biomass_NDVI <- ggplot(data = dataset,
                               aes(x = mean_NDVI_121,
-                                  y = AGB_spatially_normalised_g_m2)) + 
+                                  y = log(AGB_spatially_normalised_g_m2))) + 
           geom_point(shape = 1, na.rm = TRUE) +
           theme_coding() +
-          coord_cartesian(ylim = c(4.5, 3000), xlim = c(0.65, 0.85), expand=FALSE) +
+          coord_cartesian(ylim = c(4.5, 9), xlim = c(0.65, 0.85), expand=FALSE) +
           labs(x = expression("NDVI (0.121 m grain)"),
-               y = expression("Dry biomass (g m"^"-2"*")"),
+               y = expression("ln(Dry biomass (g m"^"-2"*"))"),
                title = "NDVI") +
           stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep="")),
                        formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
