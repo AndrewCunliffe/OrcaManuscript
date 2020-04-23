@@ -946,19 +946,19 @@ library(patchwork)
                        label.x.npc = 0.05, label.y.npc = 0.95) +
           geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE, colour = "black"))
       
-    # Combine plots
-      combined_biomass_parts <- ggpubr::ggarrange(leafmass_biomass, phytomass_biomass,
-                                                  heights = c(10, 10),
-                                                  labels = c("(a)", "(b)"),
-                                                  ncol = 2, nrow = 1,
-                                                  align = "h")
-      
-      
-    # Export figure
-      png(filename="plots/Figure 5 - leaf and phytomass vesus biomass.png", width=18, height=9, units="cm", res=400)
-      plot(combined_biomass_parts)
-      dev.off()
-      
+    # # Combine plots
+    #   combined_biomass_parts <- ggpubr::ggarrange(leafmass_biomass, phytomass_biomass,
+    #                                               heights = c(10, 10),
+    #                                               labels = c("(a)", "(b)"),
+    #                                               ncol = 2, nrow = 1,
+    #                                               align = "h")
+    #   
+    #   
+    # # Export figure
+    #   png(filename="plots/Figure 5 - leaf and phytomass vesus biomass.png", width=18, height=9, units="cm", res=400)
+    #   plot(combined_biomass_parts)
+    #   dev.off()
+    #   
       
       
       
@@ -1263,21 +1263,9 @@ library(patchwork)
                                                 align = "h")
       
       # Export figures
-      png(filename="plots/Figure X - all interactions.png", width=30, height=18, units="cm", res=400)
+      png(filename="plots/Figure S4 - moss interactions.png", width=30, height=20, units="cm", res=400)
       plot(all_interactions)
       dev.off()
-      
-      # png(filename="plots/Figure X - Biomass interactions.png", width=20, height=7, units="cm", res=400)
-      # plot(biomass_interactions)
-      # dev.off()
-      # 
-      # png(filename="plots/Figure X - Phytomass interactions.png", width=20, height=7, units="cm", res=400)
-      # plot(phytomass_interactions)
-      # dev.off()
-      # 
-      # png(filename="plots/Figure X - Leafmass interactions.png", width=20, height=7, units="cm", res=400)
-      # plot(leafmass_interactions)
-      # dev.off()
       }
       
       # Combine plots with patchwork
@@ -1285,88 +1273,9 @@ library(patchwork)
           plot_annotation(tag_levels = 'a', tag_prefix = '(', tag_suffix = ')'))
 
       # Export figure
-      png(filename="plots/Figure 5 - new.png", width=20, height=8, units="cm", res=400)
+      png(filename="plots/Figure 5.png", width=20, height=8, units="cm", res=400)
       plot(New_Figure_5)
       dev.off()
-      
-
-      
-      
-      # predictions <- ggpredict(mod_phytomass_121, terms = c("mean_NDVI_121", moss_levels))
-      # 
-      # Old (ugly) plots
-      # (interaction_NDVI121_moss <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop")) %>% plot() + theme_coding())
-      # (interaction_NDVI119_moss <- ggpredict(model119, terms = c("mean_NDVI_119", "moss_prop")) %>% plot() + theme_coding())
-      # (interaction_NDVI047_moss <- ggpredict(model047, terms = c("mean_NDVI_047", "moss_prop")) %>% plot() + theme_coding())
-      # (interaction_NDVI018_moss <- ggpredict(model018, terms = c("mean_NDVI_018", "moss_prop")) %>% plot() + theme_coding())
-
-      # Making a new theme so that the legend is better placed
-      # theme_coding2 <- function(){
-      #   theme_bw()+
-      #     theme(axis.text = element_text(size = 8),
-      #           axis.text.x = element_text(angle = 0, vjust = 1, hjust = 0.5),
-      #           axis.title = element_text(size = 10),
-      #           panel.grid = element_blank(),
-      #           plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
-      #           plot.title = element_text(size = 12, vjust = 1, hjust = 0.5),
-      #           legend.text = element_text(size = 6, face = "italic"),
-      #           legend.key.size = unit(0.9,"line"),
-      #           legend.background = element_rect(color = "black", fill = "transparent", size = 4, linetype="blank"),
-      #           legend.position = c(0.1, 0.9))
-      # }
-      # 
-      # # Set levels for ggpredict:
-      #  predictions <- ggpredict(model121, terms = c("mean_NDVI_121", "moss_prop[0.25, 0.50, 0.90]"))
-      #  
-      #  
-      #  
-      #  (moss_int_graph <- ggplot() +
-      #    geom_line(data = predictions, aes(x = x, y = predicted, colour = group),
-      #              size = 1) + 
-      #    geom_ribbon(data = predictions, aes(x = x, ymin = conf.low, ymax = conf.high,
-      #                                        fill = group), alpha = 0.2) +
-      #      theme_coding() +
-      #      # theme_coding2() +
-      #      labs(x = "\nMean NDVI", 
-      #         y = expression("Phytomass (g m"^"-2"*")"),
-      #         fill = "Moss cover", colour = "Moss cover") +
-      #    scale_colour_viridis_d(option = "magma", direction = -1, end = 0.8) +
-      #   # geom_point(data = dataset, aes(x = mean_NDVI_121, y = phytomass), alpha = 0.4) +
-      #    scale_fill_viridis_d(option = "magma", direction = -1, end = 0.8)
-      #  )
-      # 
-      # 
-      # # Alternative visualisation of moss interaction
-      # devtools::install_github("cardiomoon/ggiraphExtra")
-      # library(ggiraphExtra)
-      # ggPredict(model121) + theme_coding()
-      # ggPredict(model121) + theme_coding()
-      # ggPredict(model121) + theme_coding()
-      # ggPredict(model121) + theme_coding()
-      # 
-      # 
-      # # Export plot
-      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 121.png", width = 10, height = 10, units = "cm", res = 400)
-      # plot(interaction_NDVI121_moss)
-      # dev.off()
-      # 
-      # # Export plot
-      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 119.png", width = 10, height = 10, units = "cm", res = 400)
-      # plot(interaction_NDVI119_moss)
-      # dev.off()
-      # 
-      # # Export plot
-      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 047.png", width = 10, height = 10, units = "cm", res = 400)
-      # plot(interaction_NDVI047_moss)
-      # dev.off()
-      # 
-      # # Export plot
-      # png(filename = "plots/Figure 6 - interaction between Moss and NDVI 018.png", width = 10, height = 10, units = "cm", res = 400)
-      # plot(interaction_NDVI018_moss)
-      # dev.off()
-
-
-      
       
       
       
