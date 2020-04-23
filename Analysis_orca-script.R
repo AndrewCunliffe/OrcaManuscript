@@ -399,7 +399,7 @@ library(patchwork)
                       formula = y ~ x-1, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
                       label.x.npc = 0.03, label.y.npc = 0.99) +
          theme(legend.position = c(0.15, 0.9)) +
-         geom_smooth(method="lm", formula= y ~ x-1, se=TRUE, size=0.5, na.rm = TRUE))
+         geom_smooth(method="lm", formula= y ~ x-1, se=TRUE, size=0.5, color = "black", na.rm = TRUE))
       
       
       (biomass_CH_PF <- ggplot(data = dataset,
@@ -415,7 +415,7 @@ library(patchwork)
                        formula = y ~ x-1, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
                        label.x.npc = 0.03, label.y.npc = 0.99) +
           theme(legend.position = c(0.15, 0.9)) +
-          geom_smooth(method="lm", formula= y ~ x-1, se=TRUE, size=0.5, na.rm = TRUE))
+          geom_smooth(method="lm", formula= y ~ x-1, se=TRUE, size=0.5, color = "black", na.rm = TRUE))
       
       (biomass_NDVI <- ggplot(data = dataset,
                               aes(x = mean_NDVI_121,
@@ -430,7 +430,7 @@ library(patchwork)
                        formula = y ~ x, na.rm = TRUE, coef.digits = 4, rr.digits = 2, size = 2.5, parse = TRUE,
                        label.x.npc = 0.03, label.y.npc = 0.99) +
           theme(legend.position = c(0.15, 0.9)) +
-          geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, na.rm = TRUE))
+          geom_smooth(method="lm", formula= y ~ x, se=TRUE, size=0.5, color = "black", na.rm = TRUE))
       
 
       # Combine plots
