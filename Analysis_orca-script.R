@@ -1269,12 +1269,12 @@ library(patchwork)
       }
       
       # Combine plots with patchwork
-      (New_Figure_5 <- leafmass_biomass + phytomass_biomass + plot_phytomass_121 +
+      (Figure_5 <- leafmass_biomass + phytomass_biomass + plot_phytomass_121 +
           plot_annotation(tag_levels = 'a', tag_prefix = '(', tag_suffix = ')'))
 
       # Export figure
       png(filename="plots/Figure 5.png", width=20, height=8, units="cm", res=400)
-      plot(New_Figure_5)
+      plot(Figure_5)
       dev.off()
       
       
