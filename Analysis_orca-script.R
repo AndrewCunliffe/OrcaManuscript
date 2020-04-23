@@ -1244,23 +1244,23 @@ library(patchwork)
                                                 ncol = 4, nrow = 3,
                                                 align = "h")
       
-      biomass_interactions <- ggpubr::ggarrange(plot_biomass_121, plot_biomass_119, plot_biomass_047, plot_biomass_018,
-                                         heights = c(10, 10, 10, 10),
-                                         labels = c("(a)", "(b)", "(c)", "(d)"),
-                                         ncol = 4, nrow = 1,
-                                         align = "h")
-      
-      phytomass_interactions <- ggpubr::ggarrange(plot_phytomass_121, plot_phytomass_119, plot_phytomass_047, plot_phytomass_018,
-                                                heights = c(10, 10, 10, 10),
-                                                labels = c("(a)", "(b)", "(c)", "(d)"),
-                                                ncol = 4, nrow = 1,
-                                                align = "h")
-      
-      leafmass_interactions <- ggpubr::ggarrange(plot_leafmass_121, plot_leafmass_119, plot_leafmass_047, plot_leafmass_018,
-                                                heights = c(10, 10, 10, 10),
-                                                labels = c("(a)", "(b)", "(c)", "(d)"),
-                                                ncol = 4, nrow = 1,
-                                                align = "h")
+      # biomass_interactions <- ggpubr::ggarrange(plot_biomass_121, plot_biomass_119, plot_biomass_047, plot_biomass_018,
+      #                                    heights = c(10, 10, 10, 10),
+      #                                    labels = c("(a)", "(b)", "(c)", "(d)"),
+      #                                    ncol = 4, nrow = 1,
+      #                                    align = "h")
+      # 
+      # phytomass_interactions <- ggpubr::ggarrange(plot_phytomass_121, plot_phytomass_119, plot_phytomass_047, plot_phytomass_018,
+      #                                           heights = c(10, 10, 10, 10),
+      #                                           labels = c("(a)", "(b)", "(c)", "(d)"),
+      #                                           ncol = 4, nrow = 1,
+      #                                           align = "h")
+      # 
+      # leafmass_interactions <- ggpubr::ggarrange(plot_leafmass_121, plot_leafmass_119, plot_leafmass_047, plot_leafmass_018,
+      #                                           heights = c(10, 10, 10, 10),
+      #                                           labels = c("(a)", "(b)", "(c)", "(d)"),
+      #                                           ncol = 4, nrow = 1,
+      #                                           align = "h")
       
       # Export figures
       png(filename="plots/Figure S4 - moss interactions.png", width=30, height=20, units="cm", res=400)
