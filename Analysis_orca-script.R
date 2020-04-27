@@ -2913,7 +2913,7 @@ ggsave(
     ) +
     theme_fancy() +
     theme(
-      legend.position = c(0.19, 0.96),
+      legend.position = c(0.35, 0.96),
       axis.text.x = element_text(
         angle = 90,
         vjust = 1,
@@ -2939,7 +2939,7 @@ ggsave(
   NDVI_plots,
   filename = "plots/Figure S2 - NDVI comparison.pdf",
   width = 16,
-  height = 22,
+  height = 18,
   units = "cm"
 )
 
@@ -2947,7 +2947,7 @@ ggsave(
   NDVI_plots,
   filename = "plots/Figure S2 - NDVI comparison.png",
   width = 16,
-  height = 22,
+  height = 18,
   units = "cm"
 )
 
