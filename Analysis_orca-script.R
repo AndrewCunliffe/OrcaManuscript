@@ -76,17 +76,17 @@ theme_fancy <- function() {
       panel.grid.minor.x = element_blank(),
       panel.grid.minor.y = element_blank(),
       panel.grid.major.y = element_blank(),
-      plot.margin = unit(c(1, 1, 1, 1), units = , "cm"),
+      plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
       plot.title = element_text(
         size = 10,
         vjust = 1,
-        hjust = 0,
+        hjust = 0.5,
         color = "black"
       ),
       legend.text = element_text(size = 10, color = "black"),
       legend.title = element_text(size = 10, color = "black"),
       legend.position = c(0.9, 0.9),
-      legend.key = element_blank(),
+      legend.key.size = unit(0.9, "line"),
       legend.background = element_rect(
         color = "black",
         fill = "transparent",
@@ -708,7 +708,7 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
       rr.digits = 2,
       size = 2.5,
       parse = TRUE,
-      label.x.npc = 0.03,
+      label.x.npc = 0.15,
       label.y.npc = 0.99
     ) +
     theme(legend.position = c(0.15, 0.9)) +
@@ -749,7 +749,7 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
       rr.digits = 2,
       size = 2.5,
       parse = TRUE,
-      label.x.npc = 0.03,
+      label.x.npc = 0.15,
       label.y.npc = 0.99
     ) +
     theme(legend.position = c(0.15, 0.9)) +
@@ -791,7 +791,7 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
       rr.digits = 2,
       size = 2.5,
       parse = TRUE,
-      label.x.npc = 0.03,
+      label.x.npc = 0.15,
       label.y.npc = 0.99
     ) +
     theme(legend.position = c(0.15, 0.9)) +
@@ -1391,16 +1391,16 @@ NDVI_biomass <- ggpubr::ggarrange(
 ggsave(
   NDVI_biomass,
   filename = "plots/Figure S3 - NDVI vs biomass - exp.pdf",
-  width = 22,
-  height = 13,
+  width = 25,
+  height = 15,
   units = "cm"
 )
 
 ggsave(
   NDVI_biomass,
   filename = "plots/Figure S3 - NDVI vs biomass - exp.png",
-  width = 22,
-  height = 13,
+  width = 25,
+  height = 15,
   units = "cm"
 )
 
@@ -1969,16 +1969,16 @@ NDVI_biomass <- ggpubr::ggarrange(
 ggsave(
   NDVI_biomass,
   filename = "plots/Figure 4 - NDVI vs biomass - log.pdf",
-  width = 22,
-  height = 13,
+  width = 25,
+  height = 15,
   units = "cm"
 )
 
 ggsave(
   NDVI_biomass,
   filename = "plots/Figure 4 - NDVI vs biomass - log.png",
-  width = 22,
-  height = 13,
+  width = 25,
+  height = 15,
   units = "cm"
 )
 
@@ -2918,8 +2918,6 @@ ggsave(
     theme_fancy() +
     theme(
       legend.position = c(0.15, 0.9),
-      axis.line.x = element_line(color = "black", size = 0.5),
-      axis.line.y = element_line(color = "black", size = 0.5),
       axis.text.x = element_text(
         angle = 90,
         vjust = 1,
@@ -2999,8 +2997,6 @@ ggsave(
     theme_fancy() +
     theme(
       legend.position = c(0.19, 0.96),
-      axis.line.x = element_line(color = "black", size = 0.5),
-      axis.line.y = element_line(color = "black", size = 0.5),
       axis.text.x = element_text(
         angle = 90,
         vjust = 1,
