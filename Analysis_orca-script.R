@@ -30,6 +30,7 @@ library(miscTools)
 library(patchwork)
 library(modelr)
 
+
 # Plotting themes
 
 theme_coding <- function() {
@@ -318,9 +319,7 @@ for (file in raster_list) {
 ## Set scaling parameters
 max_agb <-
   1.1 * max(dataset$AGB_spatially_normalised_g_m2, na.rm = TRUE)
-max_hag <-
-  1.1 * max(max(dataset$HAG_plotmax_of_cellmax_m, na.rm = TRUE),
-            max(dataset$PF_HAG_max))
+max_hag <- 0.85
 max_mean_hag <-
   1.1 * max(max(dataset$HAG_plotmean_of_cellmax_m, na.rm = TRUE),
             max(dataset$PF_HAG_mean))
@@ -370,7 +369,8 @@ HAG_bias_mean
 HAG_bias_mean_SD <- round(sd(HAG_rediduals), 3)
 HAG_bias_mean_SD
 
-# Height mixed effects model
+
+# Canopy height mixed effects model
 
 # Create dataset
 height_data <- dataset %>%
@@ -444,7 +444,7 @@ ggpredict(model_heights_mixed, terms = "Height") %>% plot()
 
 ggsave(
   Canopy_heights_mixed_plot,
-  filename = "plots/Figure 2 - Canopy Heights.pdf",
+  filename = "plots/Figure 2 - Canopy Heights - alternative.pdf",
   width = 10,
   height = 10,
   units = "cm"
@@ -452,7 +452,7 @@ ggsave(
 
 ggsave(
   Canopy_heights_mixed_plot,
-  filename = "plots/Figure 2 - Canopy Heights.png",
+  filename = "plots/Figure 2 - Canopy Heights - alternative.png",
   width = 10,
   height = 10,
   units = "cm"
@@ -542,7 +542,7 @@ ggsave(
 # Export plot
 ggsave(
   Canopy_heights_plot,
-  filename = "plots/Figure 2 - Canopy Heights_old.pdf",
+  filename = "plots/Figure 2 - Canopy Heights.pdf",
   width = 10,
   height = 10,
   units = "cm"
@@ -550,7 +550,7 @@ ggsave(
 
 ggsave(
   Canopy_heights_plot,
-  filename = "plots/Figure 2 - Canopy Heights_old.png",
+  filename = "plots/Figure 2 - Canopy Heights.png",
   width = 10,
   height = 10,
   units = "cm"
@@ -679,6 +679,7 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
 
 
 # Visualisation
+
 # Create plots
 (
   biomass_CH_SfM <- ggplot(
@@ -690,7 +691,7 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
     theme_fancy() +
     coord_cartesian(
       ylim = c(0, 3000),
-      xlim = c(0, 0.9),
+      xlim = c(0, max_hag),
       expand = FALSE
     ) +
     labs(
@@ -698,19 +699,8 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
       y = expression("Dry biomass (g m" ^ "-2" * ")"),
       title = "SfM"
     ) +
-    stat_poly_eq(
-      aes(label = paste(
-        "atop(", ..eq.label.., ",", ..rr.label.., ")", sep = ""
-      )),
-      formula = y ~ x - 1,
-      na.rm = TRUE,
-      coef.digits = 4,
-      rr.digits = 2,
-      size = 2.5,
-      parse = TRUE,
-      label.x.npc = 0.15,
-      label.y.npc = 0.99
-    ) +
+    annotate(geom='text', x = (0.04*max_hag), y = (0.97*3000), size =2.6, label = 'y = 2522 x', hjust = 0) +
+    annotate(geom='text', x = (0.04*max_hag), y = (0.87*3000), size =2.6, label = paste('R^2 == 0.90'), hjust = 0, parse = TRUE) +
     theme(legend.position = c(0.15, 0.9)) +
     geom_smooth(
       method = "lm",
@@ -731,7 +721,7 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
     theme_fancy() +
     coord_cartesian(
       ylim = c(0, 3000),
-      xlim = c(0, 0.9),
+      xlim = c(0, max_hag),
       expand = FALSE
     ) +
     labs(
@@ -739,19 +729,8 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
       y = expression("Dry biomass (g m" ^ "-2" * ")"),
       title = "Point Intercept"
     ) +
-    stat_poly_eq(
-      aes(label = paste(
-        "atop(", ..eq.label.., ",", ..rr.label.., ")", sep = ""
-      )),
-      formula = y ~ x - 1,
-      na.rm = TRUE,
-      coef.digits = 4,
-      rr.digits = 2,
-      size = 2.5,
-      parse = TRUE,
-      label.x.npc = 0.15,
-      label.y.npc = 0.99
-    ) +
+    annotate(geom='text', x = (0.04*max_hag), y = (0.97*3000), size =2.6, label = 'y = 3623 x', hjust = 0) +
+    annotate(geom='text', x = (0.04*max_hag), y = (0.87*3000), size =2.6, label = paste('R^2 == 0.92'), hjust = 0, parse = TRUE) +
     theme(legend.position = c(0.15, 0.9)) +
     geom_smooth(
       method = "lm",
@@ -781,19 +760,8 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
       y = expression("ln(Dry biomass (g m" ^ "-2" * "))"),
       title = "NDVI"
     ) +
-    stat_poly_eq(
-      aes(label = paste(
-        "atop(", ..eq.label.., ",", ..rr.label.., ")", sep = ""
-      )),
-      formula = y ~ x,
-      na.rm = TRUE,
-      coef.digits = 4,
-      rr.digits = 2,
-      size = 2.5,
-      parse = TRUE,
-      label.x.npc = 0.15,
-      label.y.npc = 0.99
-    ) +
+    annotate(geom='text', x = 0.66, y = 8.85, size =2.6, label = 'y = -2.976 +13.04 x', hjust = 0) +
+    annotate(geom='text', x = 0.66, y = 8.35, size =2.6, label = paste('R^2 == 0.23'), hjust = 0, parse = TRUE) +
     theme(legend.position = c(0.15, 0.9)) +
     geom_smooth(
       method = "lm",
@@ -1486,63 +1454,18 @@ ggsave(
 ### Linear models fitted to logged biomass values ###
 # Analysis
 # Logarithmic models
-log_model_total_NDVI_121 <-
-  lm(
-    log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_121,
-    data = dataset,
-    na.action = na.exclude
-  )
-log_model_total_NDVI_119 <-
-  lm(
-    log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_119,
-    data = dataset,
-    na.action = na.exclude
-  )
-log_model_total_NDVI_047 <-
-  lm(
-    log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_047,
-    data = dataset,
-    na.action = na.exclude
-  )
-log_model_total_NDVI_018 <-
-  lm(
-    log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_018,
-    data = dataset,
-    na.action = na.exclude
-  )
-log_model_phyto_NDVI_121 <-
-  lm(log(phytomass) ~ mean_NDVI_121,
-     data = dataset,
-     na.action = na.exclude)
-log_model_phyto_NDVI_119 <-
-  lm(log(phytomass) ~ mean_NDVI_119,
-     data = dataset,
-     na.action = na.exclude)
-log_model_phyto_NDVI_047 <-
-  lm(log(phytomass) ~ mean_NDVI_047,
-     data = dataset,
-     na.action = na.exclude)
-log_model_phyto_NDVI_018 <-
-  lm(log(phytomass) ~ mean_NDVI_018,
-     data = dataset,
-     na.action = na.exclude)
-log_model_leaf_NDVI_121 <-
-  lm(log(leaf_biomass) ~ mean_NDVI_121,
-     data = dataset,
-     na.action = na.exclude)
-log_model_leaf_NDVI_119 <-
-  lm(log(leaf_biomass) ~ mean_NDVI_119,
-     data = dataset,
-     na.action = na.exclude)
-log_model_leaf_NDVI_047 <-
-  lm(log(leaf_biomass) ~ mean_NDVI_047,
-     data = dataset,
-     na.action = na.exclude)
-log_model_leaf_NDVI_018 <-
-  lm(log(leaf_biomass) ~ mean_NDVI_018,
-     data = dataset,
-     na.action = na.exclude)
-
+log_model_total_NDVI_121 <- lm(log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_121, data = dataset, na.action = na.exclude)
+log_model_total_NDVI_119 <- lm(log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_119, data = dataset, na.action = na.exclude)
+log_model_total_NDVI_047 <- lm(log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_047, data = dataset, na.action = na.exclude)
+log_model_total_NDVI_018 <- lm(log(AGB_spatially_normalised_g_m2) ~ mean_NDVI_018, data = dataset, na.action = na.exclude)
+log_model_phyto_NDVI_121 <- lm(log(phytomass) ~ mean_NDVI_121, data = dataset, na.action = na.exclude)
+log_model_phyto_NDVI_119 <- lm(log(phytomass) ~ mean_NDVI_119, data = dataset, na.action = na.exclude) 
+log_model_phyto_NDVI_047 <- lm(log(phytomass) ~ mean_NDVI_047, data = dataset, na.action = na.exclude)
+log_model_phyto_NDVI_018 <- lm(log(phytomass) ~ mean_NDVI_018, data = dataset, na.action = na.exclude)
+log_model_leaf_NDVI_121 <- lm(log(leaf_biomass) ~ mean_NDVI_121, data = dataset, na.action = na.exclude)
+log_model_leaf_NDVI_119 <- lm(log(leaf_biomass) ~ mean_NDVI_119, data = dataset, na.action = na.exclude)
+log_model_leaf_NDVI_047 <- lm(log(leaf_biomass) ~ mean_NDVI_047, data = dataset, na.action = na.exclude)
+log_model_leaf_NDVI_018 <- lm(log(leaf_biomass) ~ mean_NDVI_018, data = dataset, na.action = na.exclude)
 
 # Compile model objects
 log_models <- list(
@@ -2107,36 +2030,20 @@ hist(dataset$AGB_spatially_normalised_g_m2)
 hist(log(dataset$AGB_spatially_normalised_g_m2))
 
 # Create models
-mod_biomass_121 <-
-  lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_121 * moss_prop,
-     data = dataset)
-mod_biomass_119 <-
-  lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_119 * moss_prop,
-     data = dataset)
-mod_biomass_047 <-
-  lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_047 * moss_prop,
-     data = dataset)
-mod_biomass_018 <-
-  lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_018 * moss_prop,
-     data = dataset)
+mod_biomass_121 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_121 * moss_prop, data = dataset)
+mod_biomass_119 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_119 * moss_prop, data = dataset)
+mod_biomass_047 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_047 * moss_prop, data = dataset)
+mod_biomass_018 <- lm(AGB_spatially_normalised_g_m2 ~ mean_NDVI_018 * moss_prop, data = dataset)
 
-mod_phytomass_121 <-
-  lm(phytomass ~ mean_NDVI_121 * moss_prop, data = dataset)
-mod_phytomass_119 <-
-  lm(phytomass ~ mean_NDVI_119 * moss_prop, data = dataset)
-mod_phytomass_047 <-
-  lm(phytomass ~ mean_NDVI_047 * moss_prop, data = dataset)
-mod_phytomass_018 <-
-  lm(phytomass ~ mean_NDVI_018 * moss_prop, data = dataset)
+mod_phytomass_121 <- lm(phytomass ~ mean_NDVI_121 * moss_prop, data = dataset)
+mod_phytomass_119 <- lm(phytomass ~ mean_NDVI_119 * moss_prop, data = dataset)
+mod_phytomass_047 <- lm(phytomass ~ mean_NDVI_047 * moss_prop, data = dataset)
+mod_phytomass_018 <- lm(phytomass ~ mean_NDVI_018 * moss_prop, data = dataset)
 
-mod_leafmass_121 <-
-  lm(leaf_biomass ~ mean_NDVI_121 * moss_prop, data = dataset)
-mod_leafmass_119 <-
-  lm(leaf_biomass ~ mean_NDVI_119 * moss_prop, data = dataset)
-mod_leafmass_047 <-
-  lm(leaf_biomass ~ mean_NDVI_047 * moss_prop, data = dataset)
-mod_leafmass_018 <-
-  lm(leaf_biomass ~ mean_NDVI_018 * moss_prop, data = dataset)
+mod_leafmass_121 <- lm(leaf_biomass ~ mean_NDVI_121 * moss_prop, data = dataset)
+mod_leafmass_119 <- lm(leaf_biomass ~ mean_NDVI_119 * moss_prop, data = dataset)
+mod_leafmass_047 <- lm(leaf_biomass ~ mean_NDVI_047 * moss_prop, data = dataset)
+mod_leafmass_018 <- lm(leaf_biomass ~ mean_NDVI_018 * moss_prop, data = dataset)
 
 
 summary(mod_biomass_121)
@@ -2160,32 +2067,20 @@ summary(mod_leafmass_018)
 moss_levels <- "moss_prop[0.25, 0.50, 0.90]"  # set levels
 legend_loc <- c(0.2, 0.8)
 
-preds_biomass_121 <-
-  ggpredict(mod_biomass_121, terms = c("mean_NDVI_121", moss_levels))
-preds_biomass_119 <-
-  ggpredict(mod_biomass_119, terms = c("mean_NDVI_119", moss_levels))
-preds_biomass_047 <-
-  ggpredict(mod_biomass_047, terms = c("mean_NDVI_047", moss_levels))
-preds_biomass_018 <-
-  ggpredict(mod_biomass_018, terms = c("mean_NDVI_018", moss_levels))
+preds_biomass_121 <- ggpredict(mod_biomass_121, terms = c("mean_NDVI_121", moss_levels))
+preds_biomass_119 <- ggpredict(mod_biomass_119, terms = c("mean_NDVI_119", moss_levels))
+preds_biomass_047 <- ggpredict(mod_biomass_047, terms = c("mean_NDVI_047", moss_levels))
+preds_biomass_018 <- ggpredict(mod_biomass_018, terms = c("mean_NDVI_018", moss_levels))
 
-preds_phytomass_121 <-
-  ggpredict(mod_phytomass_121, terms = c("mean_NDVI_121", moss_levels))
-preds_phytomass_119 <-
-  ggpredict(mod_phytomass_119, terms = c("mean_NDVI_119", moss_levels))
-preds_phytomass_047 <-
-  ggpredict(mod_phytomass_047, terms = c("mean_NDVI_047", moss_levels))
-preds_phytomass_018 <-
-  ggpredict(mod_phytomass_018, terms = c("mean_NDVI_018", moss_levels))
+preds_phytomass_121 <- ggpredict(mod_phytomass_121, terms = c("mean_NDVI_121", moss_levels))
+preds_phytomass_119 <- ggpredict(mod_phytomass_119, terms = c("mean_NDVI_119", moss_levels))
+preds_phytomass_047 <- ggpredict(mod_phytomass_047, terms = c("mean_NDVI_047", moss_levels))
+preds_phytomass_018 <- ggpredict(mod_phytomass_018, terms = c("mean_NDVI_018", moss_levels))
 
-preds_leafmass_121 <-
-  ggpredict(mod_leafmass_121, terms = c("mean_NDVI_121", moss_levels))
-preds_leafmass_119 <-
-  ggpredict(mod_leafmass_119, terms = c("mean_NDVI_119", moss_levels))
-preds_leafmass_047 <-
-  ggpredict(mod_leafmass_047, terms = c("mean_NDVI_047", moss_levels))
-preds_leafmass_018 <-
-  ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", moss_levels))
+preds_leafmass_121 <- ggpredict(mod_leafmass_121, terms = c("mean_NDVI_121", moss_levels))
+preds_leafmass_119 <- ggpredict(mod_leafmass_119, terms = c("mean_NDVI_119", moss_levels))
+preds_leafmass_047 <- ggpredict(mod_leafmass_047, terms = c("mean_NDVI_047", moss_levels))
+preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", moss_levels))
 
 # Visualisations
 # Biomass
@@ -3033,3 +2928,4 @@ ggsave(
   height = 22,
   units = "cm"
 )
+
