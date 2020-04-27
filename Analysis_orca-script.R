@@ -2062,6 +2062,46 @@ summary(mod_leafmass_047)
 summary(mod_leafmass_018)
 
 
+# Compile model objects
+moss_models <- list(
+  mod_biomass_121,
+  mod_biomass_119,
+  mod_biomass_047,
+  mod_biomass_018,
+  mod_phytomass_121,
+  mod_phytomass_119,
+  mod_phytomass_047,
+  mod_phytomass_018,
+  mod_leafmass_121,
+  mod_leafmass_119,
+  mod_leafmass_047,
+  mod_leafmass_018
+)
+
+
+# Tabulate interaction model parameters
+moss_model_results <- bind_rows(lapply(moss_models, function(model) {
+  model_glance <- broom::glance(model)
+  model_tidy <- broom::tidy(model)
+  return(
+    data.frame(
+      dependent_variable = as.character(formula(model)[2]),
+      NDVI_Grain_m = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
+      Term = model_tidy$term,
+      estimate = round(model_tidy$estimate, 2),
+      Std_error = round(model_tidy$std.error, 2),
+      Statistic = round(model_tidy$statistic, 3),
+      P_value = round(model_tidy$p.value, 3),
+      stringsAsFactors = F
+    )
+  )
+}))
+
+# Export model parameters to table
+write.csv(moss_model_results, file = "tables/Table S3 interaction models.csv", row.names = F)
+
+
+
 # Visualising the moss interaction
 # The interaction effect is for two continuous variables (NDVI and moss prop), but for the sake of visualisation, ggpredict() takes the second continuous variable and  splits it into three levels of moss cover
 moss_levels <- "moss_prop[0.25, 0.50, 0.90]"  # set levels
@@ -2700,26 +2740,6 @@ all_interactions <-
     align = "h"
   )
 
-# biomass_interactions <- ggpubr::ggarrange(plot_biomass_121, plot_biomass_119, plot_biomass_047, plot_biomass_018,
-#                                    heights = c(10, 10, 10, 10),
-#                                    labels = c("(a)", "(b)", "(c)", "(d)"),
-#                                    font.label = list(size = 10, face = "bold"),
-#                                    ncol = 4, nrow = 1,
-#                                    align = "h")
-#
-# phytomass_interactions <- ggpubr::ggarrange(plot_phytomass_121, plot_phytomass_119, plot_phytomass_047, plot_phytomass_018,
-#                                           heights = c(10, 10, 10, 10),
-#                                           labels = c("(a)", "(b)", "(c)", "(d)"),
-#                                           font.label = list(size = 10, face = "bold"),
-#                                           ncol = 4, nrow = 1,
-#                                           align = "h")
-#
-# leafmass_interactions <- ggpubr::ggarrange(plot_leafmass_121, plot_leafmass_119, plot_leafmass_047, plot_leafmass_018,
-#                                           heights = c(10, 10, 10, 10),
-#                                           labels = c("(a)", "(b)", "(c)", "(d)"),
-#                                           font.label = list(size = 10, face = "bold"),
-#                                           ncol = 4, nrow = 1,
-#                                           align = "h")
 
 # Export figures
 ggsave(
@@ -2766,6 +2786,8 @@ ggsave(
   height = 8,
   units = "cm"
 )
+
+
 
 
 # Figure S1. Boxplot of canopy height observations ----
