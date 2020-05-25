@@ -745,22 +745,22 @@ write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
 (
   biomass_NDVI <- ggplot(data = dataset,
                          aes(
-                           x = mean_NDVI_121,
+                           x = mean_NDVI_119,
                            y = log(AGB_spatially_normalised_g_m2)
                          )) +
     geom_point(shape = 1, na.rm = TRUE) +
     theme_fancy() +
     coord_cartesian(
       ylim = c(4.5, 9),
-      xlim = c(0.65, 0.85),
+      xlim = c(0.6, 0.8),
       expand = FALSE
     ) +
     labs(
-      x = expression("NDVI (0.121 m grain)"),
+      x = expression("NDVI (0.119 m grain)"),
       y = expression("ln(Dry biomass (g m" ^ "-2" * "))"),
       title = "NDVI"
     ) +
-    annotate(geom='text', x = 0.66, y = 8.85, size =2.6, label = 'y = -2.976 +13.04 x', hjust = 0) +
+    annotate(geom='text', x = 0.66, y = 8.85, size =2.6, label = 'y = -0.372 +9.902 x', hjust = 0) +
     annotate(geom='text', x = 0.66, y = 8.35, size =2.6, label = paste('R^2 == 0.23'), hjust = 0, parse = TRUE) +
     theme(legend.position = c(0.15, 0.9)) +
     geom_smooth(
