@@ -172,6 +172,10 @@ PF_observations2 <-
   na.omit(PF_observations) %>%
   mutate(Height = Height / 100) # Convert heights from cm into m. Could be integrated into the above pipe.
 
+# Taxanomic ID
+unique_species <- unique(PF_observations$Species)
+unique_species
+
 # Compute canopy height summary metrics (min, max, median, mean and quantiles)
 # for each plot.
 PF_HAG_summary <- PF_observations2 %>%
