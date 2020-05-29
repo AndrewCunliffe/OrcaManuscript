@@ -100,14 +100,14 @@ theme_fancy <- function() {
 #### Extract NDVI values from rasters ----
 #   # Load data for raster extraction
 #   feature_filename <- paste0(home, "data/20160725_AC_ORC - formated for exact extractr.geojson")
-#   plots <- st_read(feature_filename, crs = 32607)                               # Import geoJSON as sf object, using st_read to allow the non-standerd CRS to be specified.
+#   plots <- st_read(feature_filename, crs = 32607)                               # Import geoJSON as sf object, using st_read to allow the non-standard CRS to be specified.
 #
 #
 #   # Import rasters (Available from the NERC Polar Data Centre - see readme for details)
-#   raster_018 <- raster(paste0(home, "inputs_NDVI/NDVI_019m_from_20160726.tif")) # import plot shapefiles.
-#   raster_047 <- raster(paste0(home, "inputs_NDVI/NDVI_050m_from_20160730.tif")) # import plot shapefiles.
-#   raster_119 <- raster(paste0(home, "inputs_NDVI/NDVI_120m_from_20160730.tif")) # import plot shapefiles.
-#   raster_121 <- raster(paste0(home, "inputs_NDVI/NDVI_120m_from_20160726.tif")) # import plot shapefiles.
+#   raster_018 <- raster(paste0(home, "inputs_NDVI/NDVI_019m_from_20160726.tif"))
+#   raster_047 <- raster(paste0(home, "inputs_NDVI/NDVI_050m_from_20160730.tif"))
+#   raster_119 <- raster(paste0(home, "inputs_NDVI/NDVI_120m_from_20160730.tif"))
+#   raster_121 <- raster(paste0(home, "inputs_NDVI/NDVI_120m_from_20160726.tif"))
 #
 #
 #   # Calculate mean NDVI for each polygon
