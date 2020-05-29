@@ -2955,3 +2955,43 @@ ggsave(
   units = "cm"
 )
 
+# SI Figure of plant functional groups across the 36 plots ----
+# Calculate percentage cover of different veg covers per plot
+PF_observations3 <- PF_observations %>%
+  drop_na(Count) %>%
+  group_by(PlotN) %>%
+  mutate(total_hits = sum(Count)) %>%
+  ungroup() %>%
+  group_by(PlotN, Species) %>%
+  mutate(species_hits = sum(Count)) %>%
+  ungroup() %>%
+  mutate(percentage_cover = species_hits/total_hits)
+
+PF_observations3$Species <- factor(PF_observations3$Species,
+                                   levels = c("Dryas integrifolia", "Equisetum", "Salix arctica", "Salix richardsonii",
+                                              "XXXbareground",  "XXXfungus", "XXXlitter", "XXXotherforb",
+                                              "XXXothergram", "XXXothermoss", "XXXvegetatedground"),
+                                   labels = c("Dryas integrifolia", "Equisetum spp.",
+                                   "Salix arctica", "Salih richardsonii", "Bare ground",
+                                   "Fungus", "Leaf litter", "Forbs", "Graminoids",
+                                   "Moss", "Vegetated ground"))
+
+(plot_cover_fig <- ggplot(PF_observations3, aes(x = PlotN, y = percentage_cover, 
+                             colour = Species, fill = Species)) +
+    geom_bar(stat = "identity", position = "fill",
+             width = 0.5) +
+    coord_flip() +
+    labs(x = "Plot number\n", y = "\nProportion cover") +
+    theme_fancy() +
+    scale_fill_manual(values = c("#fcba03", "#9de650",
+                                 "#649c28", "#025c03", "#545954",
+                                 "#aa84ab", "#946d41", "#cda3d9", "#73b4ba",
+                                 "#b3ba73", "#346078")) +
+    scale_colour_manual(values = c("#fcba03", "#9de650",
+                                   "#649c28", "#025c03", "#545954",
+                                   "#aa84ab", "#946d41", "#cda3d9", "#73b4ba",
+                                   "#b3ba73", "#346078")) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          axis.line.x = element_line(),
+          axis.line.y = element_line()))
