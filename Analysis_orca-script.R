@@ -3147,11 +3147,11 @@ meanCH <- exact_extract(rast_AOI_CHM, AOI, 'mean')                              
 
 
 # calculate biomass maps (units in g m^2 per pixel, to facilitate comparison between different spatial grain protucts)
-rast_Biomass_CHM <- AOI_CHM * model_SfM$coefficients[1] 
-rast_Biomass_NDVI_018 <- coef(exp_model_total_NDVI_018)[1] * exp(coef(exp_model_total_NDVI_018)[2] * AOI_NDVI_018)
-rast_Biomass_NDVI_047 <- coef(exp_model_total_NDVI_047)[1] * exp(coef(exp_model_total_NDVI_047)[2] * AOI_NDVI_047)
-rast_Biomass_NDVI_119 <- coef(exp_model_total_NDVI_119)[1] * exp(coef(exp_model_total_NDVI_119)[2] * AOI_NDVI_119)
-rast_Biomass_NDVI_121 <- coef(exp_model_total_NDVI_121)[1] * exp(coef(exp_model_total_NDVI_121)[2] * AOI_NDVI_121)
+rast_Biomass_CHM <- rast_AOI_CHM * model_SfM$coefficients[1] 
+rast_Biomass_NDVI_018 <- coef(exp_model_total_NDVI_018)[1] * exp(coef(exp_model_total_NDVI_018)[2] * rast_AOI_NDVI_018)
+rast_Biomass_NDVI_047 <- coef(exp_model_total_NDVI_047)[1] * exp(coef(exp_model_total_NDVI_047)[2] * rast_AOI_NDVI_047)
+rast_Biomass_NDVI_119 <- coef(exp_model_total_NDVI_119)[1] * exp(coef(exp_model_total_NDVI_119)[2] * rast_AOI_NDVI_119)
+rast_Biomass_NDVI_121 <- coef(exp_model_total_NDVI_121)[1] * exp(coef(exp_model_total_NDVI_121)[2] * rast_AOI_NDVI_121)
 
 
 # Calculate total biomass in each raster, and convert to standard units (Mg ha-1)
@@ -3256,25 +3256,25 @@ rast_Biomass_diff_NDVI_121 <- rast_Biomass_CHM
 
 par(mfrow=c(5,3))
 
-plot(AOI_CHM) 
+plot(rast_AOI_CHM) 
 plot(rast_Biomass_CHM)
-plotRGB(AOI_RGB)
+plotRGB(rast_AOI_RGB)
 
-plot(AOI_NDVI_018)
+plot(rast_AOI_NDVI_018)
 plot(rast_Biomass_NDVI_018)
-plot(rast_Biomass_diff_NDVI_018)
+plot(rast_Biomass_CHM)
 
-plot(AOI_NDVI_047)
+plot(rast_AOI_NDVI_047)
 plot(rast_Biomass_NDVI_047)
-plot(rast_Biomass_diff_NDVI_047)
+plot(rast_Biomass_CHM)
 
-plot(AOI_NDVI_119)
+plot(rast_AOI_NDVI_119)
 plot(rast_Biomass_NDVI_119)
-plot(rast_Biomass_diff_NDVI_119)
+plot(rast_Biomass_CHM)
 
-plot(AOI_NDVI_121)
+plot(rast_AOI_NDVI_121)
 plot(rast_Biomass_NDVI_121)
-plot(rast_Biomass_diff_NDVI_121)
+plot(rast_Biomass_CHM)
 
 par(mfrow=c(1,1))
 
