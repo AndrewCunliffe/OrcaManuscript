@@ -31,38 +31,7 @@ library(patchwork)
 library(modelr)
 
 
-# Plotting themes
-
-theme_coding <- function() {
-  theme_bw() +
-    theme(
-      axis.text = element_text(size = 8),
-      axis.text.x = element_text(
-        angle = 0,
-        vjust = 1,
-        hjust = 0.5
-      ),
-      axis.title = element_text(size = 10),
-      panel.grid = element_blank(),
-      plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
-      plot.title = element_text(
-        size = 12,
-        vjust = 1,
-        hjust = 0.5
-      ),
-      legend.title = element_blank(),
-      legend.text = element_text(size = 6, face = "italic"),
-      legend.key.size = unit(0.9, "line"),
-      legend.background = element_rect(
-        color = "black",
-        fill = "transparent",
-        size = 4,
-        linetype = "blank"
-      ),
-      legend.position = c(0.9, 0.9)
-    )
-}
-
+# Plotting theme
 theme_fancy <- function() {
   theme_bw() +
     theme(
@@ -127,12 +96,14 @@ theme_fancy <- function() {
 
 
 #### Load Data ----
-loc_time_data <-
-  read.csv("data/location_time_for_suncalc.csv", header = T)         # Read in locations and survey times for the suncalc
-dataset <-
-  read.csv("data/main_database.csv", header = T)                     # Read in summary  data
-PF_observations <-
-  read.csv("data/point_framing_observations.csv")            # Read in canopy height from point intercept
+loc_time_data <- read.csv("data/location_time_for_suncalc.csv", header = T)         # Read in locations and survey times for the suncalc
+
+dataset <- read.csv("data/main_database.csv", header = T)                     # Read in summary  data
+
+PF_observations <- read.csv("data/point_framing_observations.csv")            # Read in canopy height from point intercept
+
+DTM_accuracy <- read.csv("data/DTM_accuracy_assessment.csv")                    # Read in DTM accuracy assessment data.
+
 
 # Compute averge NDVI across the four rasters
 dataset$NDVImeans <-
@@ -264,10 +235,10 @@ PF_moss <- PF_observations %>%
   rename(moss_obs = n)
 
 # Add zero for plots containing no moss
-PF_moss[nrow(PF_moss) + 1, ] = list("SP04", 0)
-PF_moss[nrow(PF_moss) + 1, ] = list("SP07", 0)
-PF_moss[nrow(PF_moss) + 1, ] = list("SP11", 0)
-PF_moss[nrow(PF_moss) + 1, ] = list("SP34", 0)
+PF_moss[nrow(PF_moss) + 1, ] = list("P04", 0)
+PF_moss[nrow(PF_moss) + 1, ] = list("P07", 0)
+PF_moss[nrow(PF_moss) + 1, ] = list("P11", 0)
+PF_moss[nrow(PF_moss) + 1, ] = list("P34", 0)
 PF_moss <- dplyr::arrange(PF_moss, PlotN)  # re-order plots
 
 # Determine the proportion of PF locations that were moss for each plot
@@ -2955,6 +2926,8 @@ ggsave(
   units = "cm"
 )
 
+
+
 # SI Figure of plant functional groups across the 36 plots ----
 # Calculate percentage cover of different veg covers per plot
 PF_observations3 <- PF_observations %>%
@@ -2972,7 +2945,7 @@ PF_observations3$Species <- factor(PF_observations3$Species,
                                               "XXXbareground",  "XXXfungus", "XXXlitter", "XXXotherforb",
                                               "XXXothergram", "XXXothermoss", "XXXvegetatedground"),
                                    labels = c("Dryas integrifolia", "Equisetum spp.",
-                                   "Salix arctica", "Salih richardsonii", "Bare ground",
+                                   "Salix arctica", "Salix richardsonii", "Bare ground",
                                    "Fungus", "Leaf litter", "Forbs", "Graminoids",
                                    "Moss", "Vegetated ground"))
 
@@ -2981,7 +2954,7 @@ PF_observations3$Species <- factor(PF_observations3$Species,
     geom_bar(stat = "identity", position = "fill",
              width = 0.5) +
     coord_flip() +
-    labs(x = "Plot number\n", y = "\nProportion cover") +
+    labs(x = "Plot ID\n", y = "\nProportion of contacts") +
     theme_fancy() +
     scale_fill_manual(values = c("#fcba03", "#9de650",
                                  "#649c28", "#025c03", "#545954",
@@ -2993,5 +2966,325 @@ PF_observations3$Species <- factor(PF_observations3$Species,
                                    "#b3ba73", "#346078")) +
     theme(legend.position = "bottom",
           legend.title = element_blank(),
+          legend.text = element_text(size = 8, face = "italic"),
           axis.line.x = element_line(),
           axis.line.y = element_line()))
+
+
+
+ggsave(
+  plot_cover_fig,
+  filename = "plots/Figure S6 - taxa proportion.png",
+  width = 16,
+  height = 18,
+  units = "cm"
+)
+
+ggsave(
+  plot_cover_fig,
+  filename = "plots/Figure S6 - taxa proportion.pdf",
+  width = 16,
+  height = 18,
+  units = "cm"
+)
+
+
+
+
+### SI figure of biomass components ----
+# prepare data
+df_biomass <- data.frame("plotID" = rep(dataset$PlotID,3),
+                         "biomass" = c((dataset$Comp1_Mass*4), (dataset$Comp2_Mass*4), (dataset$Comp3_Mass*4)),
+                         "partition" = c(rep("woody",36),rep("leaves",36),rep("herbaceous",36))
+                         )
+
+# create plot
+(plot_biomass_components <- ggplot(df_biomass, aes(x = plotID, y = biomass, 
+                                                colour = partition, fill = partition)) +
+   geom_bar(stat = "identity",
+            width = 0.5) +
+   coord_flip() +
+   labs(x = "Plot ID\n", 
+        y = expression("Dry biomass (g m" ^ "-2" * ")")) +
+   theme_fancy() +
+   scale_fill_manual(values = c("#aaeb07", "#2c8232","#755504")) +
+   scale_colour_manual(values = c("#aaeb07", "#2c8232","#755504")) +
+   theme(legend.position = "bottom",
+         legend.title = element_blank(),
+         legend.text = element_text(size = 8),
+         axis.line.x = element_line(),
+         axis.line.y = element_line())
+  )
+
+# save plot
+ggsave(
+  plot_biomass_components,
+  filename = "plots/Figure S7 - biomass components.png",
+  width = 16,
+  height = 18,
+  units = "cm"
+)
+
+ggsave(
+  plot_biomass_components,
+  filename = "plots/Figure S7 - biomass components.pdf",
+  width = 16,
+  height = 18,
+  units = "cm"
+)
+
+
+
+
+### SI Figure of terrain model error ----
+# prepare data
+DTM_accuracy$z_error <- DTM_accuracy$DTM_elevation - DTM_accuracy$GNSS_elevation
+
+DTM_error_mean <- round(mean(DTM_accuracy$z_error), 3)
+DTM_error_SD <- round(sd(DTM_accuracy$z_error), 3)
+
+# create plot
+(plot_terrain_error <- ggplot(DTM_accuracy, aes(x = z_error)) +
+    geom_density(fill="lightgrey") +
+    labs(x = "\nZ error (m)\n (DTM elevation - GNSS elevation)",
+         y = "Density\n") +
+    theme_fancy() +
+    # scale_x_continuous(breaks=c(-0.1, 0.1, 0.01)) +
+    scale_x_continuous(lim = c(-0.15, 0.15)) +
+    
+    
+    geom_vline(aes(xintercept=mean(z_error)),
+               color="black", linetype="dashed", size=1)
+)
+
+# save plot
+ggsave(
+  plot_terrain_error,
+  filename = "plots/Figure S5 - DTM error.png",
+  width = 16,
+  height = 18,
+  units = "cm"
+)
+
+ggsave(
+  plot_terrain_error,
+  filename = "plots/Figure S5 - DTM error.pdf",
+  width = 16,
+  height = 18,
+  units = "cm"
+)
+
+
+
+
+
+
+
+#### Upscaling for landscape biomass estimate #### 
+
+# Load rasters
+rast_CHM <- raster("data/site_rasters/CHM.tif")                                      # Read in canopy height model at 0.010 m grain.
+rast_NDVI_018 <- raster("data/site_rasters/NDVI_018.tif")                            # Read in NDVI raster at 0.018 m grain.
+rast_NDVI_047 <- raster("data/site_rasters/NDVI_047.tif")                            # Read in NDVI raster at 0.047 m grain.
+rast_NDVI_119 <- raster("data/site_rasters/NDVI_119.tif")                            # Read in NDVI raster at 0.119 m grain.
+rast_NDVI_121 <- raster("data/site_rasters/NDVI_121.tif")                            # Read in NDVI raster at 0.121 m grain.
+rast_RGB <- stack("data/site_rasters/RGB_040.tif")                                   # Read in multi-band RGB orthmosaic at 0.040 m grain.
+
+
+# Load polygon of monitoring area (corner marker locations)
+AOI <- st_read("data/site_rasters/monitoring_plot.geojson", crs = 32607)        # Import polygon of monitoirng plot as sf object, using st_read to allow the non-standard CRS to be specified.
+st_area(AOI)                                                                    # Return area of the AOI (with units)
+AOI_area <- as.numeric(st_area(AOI))                                                # Return area of AOI (without unit attributes)
+
+
+# Clip rasters to the monitoring extent
+rast_AOI_CHM <- crop(rast_CHM, AOI)
+rast_AOI_NDVI_018 <- crop(rast_NDVI_018, AOI)
+rast_AOI_NDVI_047 <- crop(rast_NDVI_047, AOI)
+rast_AOI_NDVI_119 <- crop(rast_NDVI_119, AOI)
+rast_AOI_NDVI_121 <- crop(rast_NDVI_121, AOI)
+rast_AOI_RGB <- crop(rast_RGB, AOI)
+
+
+# Review value distributions
+hist(rast_AOI_CHM,
+     main="Distribution of canopy height Values",
+     xlab="Canopy height (m)",
+     ylab="Frequency",
+     col="grey")
+
+hist(rast_AOI_NDVI_018,
+     main="Distribution of NDVI Values (0.018m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+
+hist(rast_AOI_NDVI_047,
+     main="Distribution of NDVI Values (0.047m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+
+hist(rast_AOI_NDVI_119,
+     main="Distribution of NDVI Values (0.119m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+
+hist(rast_AOI_NDVI_121,
+     main="Distribution of NDVI Values (0.121m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+
+
+# compute mean canopy height
+meanCH <- exact_extract(rast_AOI_CHM, AOI, 'mean')                              # USed exact_extract because raster::extract is much slower.
+
+
+# calculate biomass maps (units in g m^2 per pixel, to facilitate comparison between different spatial grain protucts)
+rast_Biomass_CHM <- AOI_CHM * model_SfM$coefficients[1] 
+rast_Biomass_NDVI_018 <- coef(exp_model_total_NDVI_018)[1] * exp(coef(exp_model_total_NDVI_018)[2] * AOI_NDVI_018)
+rast_Biomass_NDVI_047 <- coef(exp_model_total_NDVI_047)[1] * exp(coef(exp_model_total_NDVI_047)[2] * AOI_NDVI_047)
+rast_Biomass_NDVI_119 <- coef(exp_model_total_NDVI_119)[1] * exp(coef(exp_model_total_NDVI_119)[2] * AOI_NDVI_119)
+rast_Biomass_NDVI_121 <- coef(exp_model_total_NDVI_121)[1] * exp(coef(exp_model_total_NDVI_121)[2] * AOI_NDVI_121)
+
+
+# Calculate total biomass in each raster, and convert to standard units (Mg ha-1)
+Biomass_CHM_gm2 <- 
+  round(cellStats(rast_Biomass_CHM, 'sum') / ncell(rast_Biomass_CHM), 1)                  # mean biomass in g m-2
+Biomass_CHM_Mgha <- 
+  round(cellStats(rast_Biomass_CHM, 'sum') / ncell(rast_Biomass_CHM) / 100, 2)                                                       # mean biomass in Mg ha-1
+
+Biomass_NDVI_018_gm2 <- 
+  round(cellStats(rast_Biomass_NDVI_018, 'sum') / ncell(rast_Biomass_NDVI_018), 1)        # mean biomass in g m-2
+Biomass_NDVI_018_Mgha <- 
+  round(cellStats(rast_Biomass_NDVI_018, 'sum') / ncell(rast_Biomass_NDVI_018) / 100, 2)                                                   # mean biomass in Mg ha-1
+
+Biomass_NDVI_047_gm2 <- 
+  round(cellStats(rast_Biomass_NDVI_047, 'sum') / ncell(rast_Biomass_NDVI_047), 1)        # mean biomass in g m-2
+Biomass_NDVI_047_Mgha <- 
+  round(cellStats(rast_Biomass_NDVI_047, 'sum') / ncell(rast_Biomass_NDVI_047) / 100, 2)                                                  # mean biomass in Mg ha-1
+
+Biomass_NDVI_119_gm2 <- 
+  round(cellStats(rast_Biomass_NDVI_119, 'sum') / ncell(rast_Biomass_NDVI_119), 1)        # mean biomass in g m-2
+Biomass_NDVI_119_Mgha <- 
+  round(cellStats(rast_Biomass_NDVI_119, 'sum') / ncell(rast_Biomass_NDVI_119) / 100, 2)                                                  # mean biomass in Mg ha-1
+
+Biomass_NDVI_121_gm2 <- 
+  round(cellStats(rast_Biomass_NDVI_121, 'sum') / ncell(rast_Biomass_NDVI_121), 1)        # mean biomass in g m-2
+Biomass_NDVI_121_Mgha <- 
+  round(cellStats(rast_Biomass_NDVI_121, 'sum') / ncell(rast_Biomass_NDVI_121) / 100, 2)                                                  # mean biomass in Mg ha-1
+
+
+# create dataframe of total biomass estimates
+df_biomass_est <- data.frame("Raster" = c("CHM",
+                                          "NDVI 0.018 m",
+                                          "NDVI 0.047 m",
+                                          "NDVI 0.119 m",
+                                          "NDVI 0.121 m"),
+                             "Biomass_Mg_ha1" = c(Biomass_CHM_Mgha,
+                                                  Biomass_NDVI_018_Mgha,
+                                                  Biomass_NDVI_047_Mgha,
+                                                  Biomass_NDVI_119_Mgha,
+                                                  Biomass_NDVI_121_Mgha),
+                             "Biomass_g_m2" = c(Biomass_CHM_gm2,
+                                                Biomass_NDVI_018_gm2,
+                                                Biomass_NDVI_047_gm2,
+                                                Biomass_NDVI_119_gm2, 
+                                                Biomass_NDVI_121_gm2)
+                             )
+
+# Export total biomass estimates
+write.csv(df_biomass_est,"tables/Table 3 Biomass estimates.csv", row.names = FALSE)            # extracted NDVI values were added to the main_database file. ndvi_data <- read.csv("data/Extracted_NDVI.csv", header = T)                  # Read in NDVI values from Exact Extract pipeline.
+
+# TEMP - write clipped rasters for development ----
+# writeRaster(rast_AOI_CHM, "data/site_rasters/rast_AOI_CHM.tif")
+# writeRaster(rast_AOI_RGB, "data/site_rasters/rast_AOI_RGB.tif")
+# writeRaster(rast_AOI_NDVI_018, "data/site_rasters/rast_AOI_NDVI_018.tif")
+# writeRaster(rast_AOI_NDVI_047, "data/site_rasters/rast_AOI_NDVI_047.tif")
+# writeRaster(rast_AOI_NDVI_119, "data/site_rasters/rast_AOI_NDVI_119.tif")
+# writeRaster(rast_AOI_NDVI_121, "data/site_rasters/rast_AOI_NDVI_121.tif")
+
+
+### Calculate biomass difference rasters
+# TO FINISH ----
+# Calcualting difference maps requires rasters with the same resolution (and alignment)
+# I think our aim here should be to purely to illustrate the spatial distribution of differences,
+# which are on the order of 25%-70% overall so are pretty large relative to minor errors in resampling.
+# I'm prettry sure resampling (raster::resample with bilinear) is the way to go here, 
+# but I can't work out how to specify a resolution (e.g. 0.2 m?) Do we HAVE to simply use the resolution of the coarsest raster? 
+res(rast_Biomass_NDVI_121) ?
+
+# new_rast <- (raster::resample(rast1, rast2, method="bilinear")  #resample rast1 to match rast 2... # for bilinear interpolation
+
+# rast_Biomass_NDVI_018_coarse <- rast_Biomass_NDVI_018
+# rast_Biomass_NDVI_047_coarse <- rast_Biomass_NDVI_047
+# rast_Biomass_NDVI_119_coarse <- rast_Biomass_NDVI_119
+# rast_Biomass_NDVI_121_coarse <- rast_Biomass_NDVI_121
+
+
+
+
+
+
+# compute difference mapes
+rast_Biomass_diff_NDVI_018 <- rast_Biomass_CHM
+# Biomass_diff_NDVI_018 <- rast_Biomass_CHM - rast_Biomass_NDVI_018
+rast_Biomass_diff_NDVI_047 <- rast_Biomass_CHM
+# Biomass_diff_NDVI_047 <- rast_Biomass_CHM - rast_Biomass_NDVI_047
+rast_Biomass_diff_NDVI_119 <- rast_Biomass_CHM
+# Biomass_diff_NDVI_119 <- rast_Biomass_CHM - rast_Biomass_NDVI_119
+rast_Biomass_diff_NDVI_121 <- rast_Biomass_CHM
+# Biomass_diff_NDVI_121 <- rast_Biomass_CHM - rast_Biomass_NDVI_121
+
+
+### Final figure for the manuscript with these 15 rasters together (3 cols x 5 rows)
+# planning to include the RGB image in the empty space left because the CHM is not differenced against itself.
+
+# TO FINISH: ----
+# 1) how to put these together nicely? (Patchwork doesn't work with these plot objects, and par is just yuk.
+# 2) set the scale limits of NDVI to facilitate comparison (from 0 to 1)
+# 3) set the scale limits of biomass to facilitate comparison (from 0 to at least 3500 g m^2)
+# 4) Consider using different colour scalar for the NDVI vs. biomass vs. biomass difference plots, to aid interpretation that these are differnt metrics.
+# 5) need scaler legends for: 1) canopy height (m), 2) NDVI, 3) biomass, 4) biomass difference
+# 6) need scale bar.
+
+par(mfrow=c(5,3))
+
+plot(AOI_CHM) 
+plot(rast_Biomass_CHM)
+plotRGB(AOI_RGB)
+
+plot(AOI_NDVI_018)
+plot(rast_Biomass_NDVI_018)
+plot(rast_Biomass_diff_NDVI_018)
+
+plot(AOI_NDVI_047)
+plot(rast_Biomass_NDVI_047)
+plot(rast_Biomass_diff_NDVI_047)
+
+plot(AOI_NDVI_119)
+plot(rast_Biomass_NDVI_119)
+plot(rast_Biomass_diff_NDVI_119)
+
+plot(AOI_NDVI_121)
+plot(rast_Biomass_NDVI_121)
+plot(rast_Biomass_diff_NDVI_121)
+
+par(mfrow=c(1,1))
+
+
+
+# TO FINISH:  ----
+# To illustrate how (non)representative our sampled harvest plots were of the 
+# range of NDVI values encountered in the upscaled monitoirng area, perhaps it
+# would be nice to produce a density plots of NDVI values for (each) biomass 
+# harvest plot and the monitoring area.
+
+
+
