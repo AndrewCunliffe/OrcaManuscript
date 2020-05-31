@@ -3105,6 +3105,13 @@ rast_AOI_NDVI_119 <- crop(rast_NDVI_119, AOI)
 rast_AOI_NDVI_121 <- crop(rast_NDVI_121, AOI)
 rast_AOI_RGB <- crop(rast_RGB, AOI)
 
+# Load rasters
+# rast_AOI_CHM <- raster("data/site_rasters/rast_AOI_CHM.tif")
+# rast_AOI_RGB <- brick("data/site_rasters/rast_AOI_RGB.tif")
+# rast_AOI_NDVI_018 <- raster("data/site_rasters/rast_AOI_NDVI_018.tif")
+# rast_AOI_NDVI_047 <- raster("data/site_rasters/rast_AOI_NDVI_047.tif")
+# rast_AOI_NDVI_119 <- raster("data/site_rasters/rast_AOI_NDVI_119.tif")
+# rast_AOI_NDVI_121<- raster("data/site_rasters/rast_AOI_NDVI_121.tif")
 
 # Review value distributions
 hist(rast_AOI_CHM,
@@ -3218,67 +3225,338 @@ write.csv(df_biomass_est,"tables/Table 3 Biomass estimates.csv", row.names = FAL
 # which are on the order of 25%-70% overall so are pretty large relative to minor errors in resampling.
 # I'm prettry sure resampling (raster::resample with bilinear) is the way to go here, 
 # but I can't work out how to specify a resolution (e.g. 0.2 m?) Do we HAVE to simply use the resolution of the coarsest raster? 
-res(rast_Biomass_NDVI_121) ?
+#res(rast_Biomass_NDVI_121) ?
 
 # new_rast <- (raster::resample(rast1, rast2, method="bilinear")  #resample rast1 to match rast 2... # for bilinear interpolation
 
-# rast_Biomass_NDVI_018_coarse <- rast_Biomass_NDVI_018
-# rast_Biomass_NDVI_047_coarse <- rast_Biomass_NDVI_047
-# rast_Biomass_NDVI_119_coarse <- rast_Biomass_NDVI_119
-# rast_Biomass_NDVI_121_coarse <- rast_Biomass_NDVI_121
+# Jakob: You're on the right track here, like you said it's a bit more 
+# complicated one would wish for. I think going for 0.2 m is a good idea. 
+# Bi-linear resampling introduces less uncertainties if we also aggregate a bit
+# annd we wanna make sure that the new rsolution is almost a multiple of the
+# smaller resolutions. So 0.2 m or even 0.25 m would work well. 
+# Checking out the relative rest of the division (using modulo)
+(200%%c(18,47,119,121)) / c(18,47,119,121)
+(250%%c(18,47,119,121)) / c(18,47,119,121)
+# with 250 we would end up with less bilinear resampling for the coarser resolution,
+# the relative remainder for the smaller resolution is larger, but we also 
+# aggregate across more pixels of those, so the error will be smaler. I'd say 
+# let's go for 0.25 m! 
+
+# Indeed the trick in R is  to create an empty target raster with the
+# desired properties and then resample into  that. 
 
 
 
+# Create vector with raster names for convenience in handling later
+raster_names <- c("rast_Biomass_CHM", 
+                  "rast_Biomass_NDVI_018",
+                  "rast_Biomass_NDVI_047",
+                  "rast_Biomass_NDVI_119",
+                  "rast_Biomass_NDVI_121")
 
+# check the extent of all rasters matches (just as I don't know them)
+lapply(raster_names, function(x) extent(get(x)))
+# They match optically, but R rounds up the display with low precision. 
+# So the actual floats don't  match:
+lapply(raster_names, function(x) extent(get(x))@xmin == 581926.7) 
+# and: 
+lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@xmin)) 
+lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@xmax))
+lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@ymin))
+lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@ymax))
 
+# We solve this by trimming the edges, this will introduce even further 
+# inaccuracies in the re-sampling, but nothing we can do about it!
+# (looking at those differences, I guess we could also just re-sample to 0.2 m,
+# but let's stick to the plan)
+target_raster <- raster(xmn = 581926.75,
+                        xmx = 582040.50,
+                        ymn = 7719550.50,
+                        ymx = 7719597.00,
+                        crs = crs(rast_AOI_CHM),
+                        res = 0.25)
+# The rest is easy:
+list2env(
+  lapply(setNames(raster_names,
+                paste0(raster_names, "_coarse")),
+       function(x) raster::resample(get(x), target_raster)),
+       envir = .GlobalEnv)
 
-# compute difference mapes
-rast_Biomass_diff_NDVI_018 <- rast_Biomass_CHM
-# Biomass_diff_NDVI_018 <- rast_Biomass_CHM - rast_Biomass_NDVI_018
-rast_Biomass_diff_NDVI_047 <- rast_Biomass_CHM
-# Biomass_diff_NDVI_047 <- rast_Biomass_CHM - rast_Biomass_NDVI_047
-rast_Biomass_diff_NDVI_119 <- rast_Biomass_CHM
-# Biomass_diff_NDVI_119 <- rast_Biomass_CHM - rast_Biomass_NDVI_119
-rast_Biomass_diff_NDVI_121 <- rast_Biomass_CHM
-# Biomass_diff_NDVI_121 <- rast_Biomass_CHM - rast_Biomass_NDVI_121
+# Compute difference maps
+list2env(
+  lapply(setNames(paste0(raster_names, "_coarse")[-1],
+                  paste0(raster_names, "_coarse_diff")[-1]),
+         function(x) rast_Biomass_CHM_coarse - get(x)),
+  envir = .GlobalEnv)
 
+# Check them quickly:
+# library(rasterVis)
+# lapply(paste0(raster_names, "_coarse_diff")[-1],
+#          function(x) levelplot(get(x)))
+# levelplot(rast_Biomass_CHM_coarse)
+# levelplot(rast_Biomass_NDVI_018_coarse)
+# levelplot(rast_Biomass_NDVI_018_coarse_diff)
 
 ### Final figure for the manuscript with these 15 rasters together (3 cols x 5 rows)
 # planning to include the RGB image in the empty space left because the CHM is not differenced against itself.
 
 # TO FINISH: ----
 # 1) how to put these together nicely? (Patchwork doesn't work with these plot objects, and par is just yuk.
+# Jakob: Plotting rasters in R beautifully took me a while to work out
+# ggplot can handle rasters well, but it's ability to do so well is still developing
+# Most people I know use the rasterVis package
+# install.packages("rasterVis")
+library(rasterVis)
+# which uses lattice plots that can be arranged into multiple grobs with gridExtra
+# install.packages("gridExtra")
+library(gridExtra)
 # 2) set the scale limits of NDVI to facilitate comparison (from 0 to 1)
 # 3) set the scale limits of biomass to facilitate comparison (from 0 to at least 3500 g m^2)
 # 4) Consider using different colour scalar for the NDVI vs. biomass vs. biomass difference plots, to aid interpretation that these are differnt metrics.
 # 5) need scaler legends for: 1) canopy height (m), 2) NDVI, 3) biomass, 4) biomass difference
 # 6) need scale bar.
+# Jakob: This can all be nicely done with levelplot from the rasterVis package
 
-par(mfrow=c(5,3))
+# Create dataframe of rasters to plot
+rasters_to_plot <- data.frame(
+  raster_name = c("rast_AOI_CHM",
+                  "rast_Biomass_CHM",
+                  "rast_AOI_RGB",
+                  "rast_AOI_NDVI_018",
+                  "rast_Biomass_NDVI_018",
+                  "rast_Biomass_NDVI_018_coarse_diff",
+                  "rast_AOI_NDVI_047",
+                  "rast_Biomass_NDVI_047",
+                  "rast_Biomass_NDVI_047_coarse_diff",
+                  "rast_AOI_NDVI_119",
+                  "rast_Biomass_NDVI_119",
+                  "rast_Biomass_NDVI_119_coarse_diff",
+                  "rast_AOI_NDVI_121",
+                  "rast_Biomass_NDVI_121",
+                  "rast_Biomass_NDVI_121_coarse_diff"),
+  plot_type = c("chm",
+                 "biomass",
+                 "rgb",
+                 rep(c("ndvi",
+                       "biomass",
+                       "diff"), 4)),
+  col_ramp_title = c("Canopy Height (m)",
+                    "Biomass (mg)",
+                    "none",
+                    rep(c("NDVI",
+                          "Biomass (mg)",
+                          "Δ Biomass (mg)"), 4)),
+  col_ramp_min = c(0,0,NA, 
+                   rep(c(0,0,-3000), 4)), # Minimum scale values
+  col_ramp_max = c(1.4,3500,NA,
+                   rep(c(1,3500,2000), 4)), # Maximum scale values
+  col_ramp_step = c(0.2,500,NA,
+                    rep(c(0.2,500,1000), 4)), # Color ramp klegend steps
+  panel_label = paste0("(",
+                       letters[1:15],
+                       ") ",
+                       c("SfM Canopy Height",
+                         "Biomass SfM",
+                         "RGB",
+                         "NDVI (0.018 m)",
+                         "Biomass NDVI (0.018 m)",
+                         "Difference Biomass SfM - NDV (0.018 m)",
+                         "NDVI (0.047 m)",
+                         "Biomass NDVI (0.047 m)",
+                         "Difference Biomass SfM - NDV (0.047 m)",
+                         "NDVI (0.119 m)",
+                         "Biomass NDVI (0.119 m)",
+                         "Difference Biomass SfM - NDV (0.119 m)",
+                         "NDVI (0.121 m)",
+                         "Biomass NDVI (0.121 m)",
+                         "Difference Biomass SfM - NDV (0.121 m)")),
+  panel_label_xpos = rep(c(0.07,0.07, 0.06),5),
+  scale_bar_col = c("white", "white", "white",
+                    "black", "white", "black",
+                    rep(c("black", "black", "black"), 3)),
+  stringsAsFactors = F)
 
-plot(rast_AOI_CHM) 
-plot(rast_Biomass_CHM)
-plotRGB(rast_AOI_RGB)
-
-plot(rast_AOI_NDVI_018)
-plot(rast_Biomass_NDVI_018)
-plot(rast_Biomass_CHM)
-
-plot(rast_AOI_NDVI_047)
-plot(rast_Biomass_NDVI_047)
-plot(rast_Biomass_CHM)
-
-plot(rast_AOI_NDVI_119)
-plot(rast_Biomass_NDVI_119)
-plot(rast_Biomass_CHM)
-
-plot(rast_AOI_NDVI_121)
-plot(rast_Biomass_NDVI_121)
-plot(rast_Biomass_CHM)
-
-par(mfrow=c(1,1))
+# Generate colour ramps with the colorspace package
+library(colorspace)
+chm_col <- sequential_hcl(100, palette = "Blues")
+ndvi_col <- sequential_hcl(100, palette = "Oranges")
+biomass_col <- sequential_hcl(100, palette = "Greens")
+diff_col <- diverging_hcl(600, palette = "Purple-Brown")[1:500] # Calculate 600 values, only use 500 due to imbalance aorund 0 
 
 
+plot_pretty_raster <- function(raster_name) {
+  # Get raster object
+  raster_to_plot <- get(raster_name)
+  # get plot type
+  plot_type <- rasters_to_plot$plot_type[rasters_to_plot$raster_name == raster_name]
+  
+   # If RGB raster do the following
+  if(plot_type == "rgb") {
+    # throw out alpha band
+    raster_to_plot <- raster_to_plot[[1:3]]
+    # It's huge, so when trying layout changes aggregate to a sensible res first
+    # raster_to_plot <- raster::aggregate(raster_to_plot, 5)
+    # To use lattice (for compatibility with the other raster plots) we
+    # need to create the RGB colourspace ourselves.
+    
+    # Create RGB color for cell values
+    cols <- factor(rgb(raster_to_plot[], maxColorValue=255))
+    
+    # Creat single band temp raster
+    temp_raster <- raster(raster_to_plot)
+    # re-assign cell values
+    temp_raster[] <- cols
+    
+    # Plot
+    pretty_plot <- levelplot(temp_raster, 
+                             margin=FALSE,  # don't plot margins
+                             scales=list(draw=FALSE), # suppress axis labels
+                             col.regions=as.character(levels(cols)),
+                             colorkey=FALSE,
+                             xlab.top = list("ffadsf", col = "white", cex = 0.8), # Quick work around to make sure spacing is the same
+                             #xlab = list("dfsafasdf", col = "white", cex = 1), # Quick work around to make sure spacing is the same
+                             ylab.right = list("sdfsfa", col = "white", cex = 6.75) # This is a quick work around to replace the color key bar...
+                             ) + 
+      # Add scale bar
+      latticeExtra::layer({
+        ## Scale bar
+        # Determine position of scale bar (bottom left corner)
+        scale_bar_length <- 20 # Scale bar lenght 20 m
+        scale_bar_height <- 2.5 # scale baer height 2.5m (seeme like a good start for 50 m height raster)
+        scale_bar_nsegments <- 2 # 4 segments
+        scale_bar_xpos <- 10 # x position from bottom left corner in percent
+        scale_bar_ypos <- 10 # y position from bottom left corner in percent
+        scale_bar_col <- rasters_to_plot$scale_bar_col[rasters_to_plot$raster_name == raster_name]
+        
+        # calculate derived parameters:
+        # (there is a bug in lettice so we need to shove it into the global enviornment)
+        scale_bar_xmin <- extent(raster_to_plot[[1]])@xmin + 
+          ((extent(raster_to_plot[[1]])@xmax -
+              extent(raster_to_plot[[1]])@xmin) / 100 * scale_bar_xpos)
+        scale_bar_xmax <- scale_bar_xmin + scale_bar_length 
+        scale_bar_ymin <- extent(raster_to_plot[[1]])@ymin + 
+          ((extent(raster_to_plot[[1]])@ymax -
+              extent(raster_to_plot[[1]])@ymin) / 100 * scale_bar_ypos)
+        scale_bar_step <- scale_bar_length / scale_bar_nsegments
+        
+        xs <- seq(scale_bar_xmin, scale_bar_xmax, scale_bar_step)
+        grid.rect(x = xs[1:(length(xs)-1)],
+                  y = scale_bar_ymin,
+                  width = scale_bar_step, height=scale_bar_height,
+                  gp= gpar(fill = rep(c('transparent', scale_bar_col),
+                                      2),
+                           col = scale_bar_col),
+                  default.units='native')
+        grid.text(x = xs - (scale_bar_step / 2), 
+                  y = scale_bar_ymin + scale_bar_height * 1.5,
+                  paste(seq(0, scale_bar_length, scale_bar_step), "m"),
+                  gp=gpar(cex=0.8, col = scale_bar_col),
+                  default.units='native')
+      }, data = list(raster_name = raster_name)) # + 
+    #### Add north arrow (can be replaced with any polygon, this one is ugly)
+    # latticeExtra::layer({
+    #   SpatialPolygonsRescale(layout.north.arrow(),
+    #                          offset = c(scale_bar_xmin + scale_bar_length * 1.1,
+    #                                     scale_bar_ymin),
+    #                          scale = scale_bar_height * 2)
+    #   theme = list(col.regions = "white")
+    # }) +
+  } else { # else....
+    # Set color ramp
+    col_ramp <- get(paste0(plot_type, "_col"))
+    # Set color key label
+    col_key_label <- rasters_to_plot$col_ramp_title[rasters_to_plot$raster_name == raster_name]
+    
+    # Set col ramp limits 
+    col_scale_min <- rasters_to_plot$col_ramp_min[rasters_to_plot$raster_name == raster_name]
+    col_scale_max <- rasters_to_plot$col_ramp_max[rasters_to_plot$raster_name == raster_name]
+    col_scale_step <- rasters_to_plot$col_ramp_step[rasters_to_plot$raster_name == raster_name]
+    
+    pretty_plot <- levelplot(raster_to_plot, 
+                             margin=FALSE,                       # don't plot margins
+                             colorkey=list(
+                               space='right',                   # right
+                               labels=list(at=seq(col_scale_min,
+                                                  col_scale_max,
+                                                  col_scale_step), 
+                                           font=1, cex = 1)  # Colorkey axis text
+                             ),    
+                             legend=list(top=list(fun=grid::textGrob(col_key_label, y=1.1, x=1.07),
+                                                  cex = 1)),
+                             scales=list(draw=FALSE),            # suppress axis labels
+                             col.regions=col_ramp,                   # colour ramp
+                             at=seq(col_scale_min, col_scale_max, length.out = 100)) + 
+      latticeExtra::layer({
+        ## Scale bar
+        # Determine position of scale bar (bottom left corner)
+        scale_bar_length <- 20 # Scale bar lenght 20 m
+        scale_bar_height <- 2.5 # scale baer height 2.5m (seeme like a good start for 50 m height raster)
+        scale_bar_nsegments <- 2 # 4 segments
+        scale_bar_xpos <- 10 # x position from bottom left corner in percent
+        scale_bar_ypos <- 10 # y position from bottom left corner in percent
+        scale_bar_col <- rasters_to_plot$scale_bar_col[rasters_to_plot$raster_name == raster_name]
+        
+        # calculate derived parameters:
+        # (there is a bug in lettice so we need to shove it into the global enviornment)
+        scale_bar_xmin <- extent(raster_to_plot[[1]])@xmin + 
+          ((extent(raster_to_plot[[1]])@xmax -
+              extent(raster_to_plot[[1]])@xmin) / 100 * scale_bar_xpos)
+        scale_bar_xmax <- scale_bar_xmin + scale_bar_length 
+        scale_bar_ymin <- extent(raster_to_plot[[1]])@ymin + 
+          ((extent(raster_to_plot[[1]])@ymax -
+              extent(raster_to_plot[[1]])@ymin) / 100 * scale_bar_ypos)
+        scale_bar_step <- scale_bar_length / scale_bar_nsegments
+        
+        xs <- seq(scale_bar_xmin, scale_bar_xmax, scale_bar_step)
+        grid.rect(x = xs[1:(length(xs)-1)],
+                  y = scale_bar_ymin,
+                  width = scale_bar_step, height=scale_bar_height,
+                  gp= gpar(fill = rep(c('transparent', scale_bar_col),
+                                      2),
+                           col = scale_bar_col),
+                  default.units='native')
+        grid.text(x = xs - (scale_bar_step / 2), 
+                  y = scale_bar_ymin + scale_bar_height * 1.5,
+                  paste(seq(0, scale_bar_length, scale_bar_step), "m"),
+                  gp=gpar(cex=0.8, col = scale_bar_col),
+                  default.units='native')
+      }, data = list(raster_name = raster_name)) # + 
+    #### Add north arrow (can be replaced with any polygon, this one is ugly)
+    # latticeExtra::layer({
+    #   SpatialPolygonsRescale(layout.north.arrow(),
+    #                          offset = c(scale_bar_xmin + scale_bar_length * 1.1,
+    #                                     scale_bar_ymin),
+    #                          scale = scale_bar_height * 2)
+    #   theme = list(col.regions = "white")
+    # }) +
+  }
+  # Add label to top left
+  panel_label <- rasters_to_plot$panel_label[rasters_to_plot$raster_name == raster_name]
+  panel_label_xpos <- rasters_to_plot$panel_label_xpos[rasters_to_plot$raster_name == raster_name]
+  pretty_plot_with_label <- arrangeGrob(pretty_plot,
+                         top = textGrob(panel_label,
+                                        x = unit(panel_label_xpos, "npc"), 
+                                        y   = unit(0, "npc"), 
+                                        just=c("left","top"),
+                                        gp=gpar(col="black", 
+                                                fontsize=18, 
+                                                fontfamily="Arial")))
+  return(pretty_plot_with_label)
+}
+
+# Execute for all plots
+pretty_plot_list <- lapply(rasters_to_plot$raster_name,
+                       plot_pretty_raster)
+
+# Export PNG for plot grid
+png("plots/Figure X Biomass Maps.png", 
+    width = 7 * 3,
+    height = 3 * 5,
+    units = "in",
+    res = 300)
+print(grid.arrange(grobs = pretty_plot_list,
+                   ncol = 3))
+dev.off()
 
 # TO FINISH:  ----
 # To illustrate how (non)representative our sampled harvest plots were of the 
@@ -3286,5 +3564,6 @@ par(mfrow=c(1,1))
 # would be nice to produce a density plots of NDVI values for (each) biomass 
 # harvest plot and the monitoring area.
 
+# Jakob: Sounds like a good plan!
 
 
