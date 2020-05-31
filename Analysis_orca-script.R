@@ -3360,16 +3360,16 @@ rasters_to_plot <- data.frame(
                          "RGB",
                          "NDVI (0.018 m)",
                          "Biomass NDVI (0.018 m)",
-                         "Difference Biomass SfM - NDV (0.018 m)",
+                         "Diff. Biomass SfM - NDVI (0.018 m)",
                          "NDVI (0.047 m)",
                          "Biomass NDVI (0.047 m)",
-                         "Difference Biomass SfM - NDV (0.047 m)",
+                         "Diff. Biomass SfM - NDVI (0.047 m)",
                          "NDVI (0.119 m)",
                          "Biomass NDVI (0.119 m)",
-                         "Difference Biomass SfM - NDV (0.119 m)",
+                         "Diff. Biomass SfM - NDVI (0.119 m)",
                          "NDVI (0.121 m)",
                          "Biomass NDVI (0.121 m)",
-                         "Difference Biomass SfM - NDV (0.121 m)")),
+                         "Diff. Biomass SfM - NDVI (0.121 m)")),
   panel_label_xpos = rep(c(0.07,0.07, 0.06),5),
   scale_bar_col = c("white", "white", "white",
                     "black", "white", "black",
@@ -3565,6 +3565,10 @@ dev.off()
 # would be nice to produce a density plots of NDVI values for (each) biomass 
 # harvest plot and the monitoring area.
 
-# Jakob: Sounds like a good plan!
+# Jakob: Sounds like a good plan! This could be quickly done by extracting
+# the NDVI values using an exctract funcion or getValues then get the density
+# plots from the dataframes using gpplot. 
+# I've run out of time for today, but let me know if you need help with this also!
+
 
 
