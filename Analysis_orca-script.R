@@ -3377,6 +3377,7 @@ rasters_to_plot <- data.frame(
   stringsAsFactors = F)
 
 # Generate colour ramps with the colorspace package
+# install.packages("colorspace")
 library(colorspace)
 chm_col <- sequential_hcl(100, palette = "Blues")
 ndvi_col <- sequential_hcl(100, palette = "Oranges")
