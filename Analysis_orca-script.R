@@ -1333,7 +1333,7 @@ NDVI_biomass <- ggpubr::ggarrange(
 # Export figure
 ggsave(
   NDVI_biomass,
-  filename = "plots/Figure S3 - NDVI vs biomass - exp.pdf",
+  filename = "plots/Figure S5 - NDVI vs biomass - exp.pdf",
   width = 25,
   height = 15,
   units = "cm"
@@ -1341,7 +1341,7 @@ ggsave(
 
 ggsave(
   NDVI_biomass,
-  filename = "plots/Figure S3 - NDVI vs biomass - exp.png",
+  filename = "plots/Figure S5 - NDVI vs biomass - exp.png",
   width = 25,
   height = 15,
   units = "cm"
@@ -2719,7 +2719,7 @@ all_interactions <-
 # Export figures
 ggsave(
   all_interactions,
-  filename = "plots/Figure S4 - moss interactions.pdf",
+  filename = "plots/Figure S6 - moss interactions.pdf",
   width = 30,
   height = 20,
   units = "cm"
@@ -2727,7 +2727,7 @@ ggsave(
 
 ggsave(
   all_interactions,
-  filename = "plots/Figure S4 - moss interactions.png",
+  filename = "plots/Figure S6 - moss interactions.png",
   width = 30,
   height = 20,
   units = "cm"
@@ -2836,7 +2836,7 @@ ggsave(
 )
 
 
-# Figure S2. Comparison of mean NDVIs  ----
+# Figure S4. Comparison of mean NDVIs  ----
 # Boxplot
 (
   NDVI_boxplot <- ggplot(data = NDVI_data_long,
@@ -2912,7 +2912,7 @@ NDVI_plots <- ggpubr::ggarrange(
 # Export barplot
 ggsave(
   NDVI_plots,
-  filename = "plots/Figure S2 - NDVI comparison.pdf",
+  filename = "plots/Figure S4 - NDVI comparison.pdf",
   width = 16,
   height = 18,
   units = "cm"
@@ -2920,7 +2920,7 @@ ggsave(
 
 ggsave(
   NDVI_plots,
-  filename = "plots/Figure S2 - NDVI comparison.png",
+  filename = "plots/Figure S4 - NDVI comparison.png",
   width = 16,
   height = 18,
   units = "cm"
@@ -2974,7 +2974,7 @@ PF_observations3$Species <- factor(PF_observations3$Species,
 
 ggsave(
   plot_cover_fig,
-  filename = "plots/Figure S6 - taxa proportion.png",
+  filename = "plots/Figure S2 - taxa proportion.png",
   width = 16,
   height = 18,
   units = "cm"
@@ -2982,7 +2982,7 @@ ggsave(
 
 ggsave(
   plot_cover_fig,
-  filename = "plots/Figure S6 - taxa proportion.pdf",
+  filename = "plots/Figure S2 - taxa proportion.pdf",
   width = 16,
   height = 18,
   units = "cm"
@@ -3019,7 +3019,7 @@ df_biomass <- data.frame("plotID" = rep(dataset$PlotID,3),
 # save plot
 ggsave(
   plot_biomass_components,
-  filename = "plots/Figure S7 - biomass components.png",
+  filename = "plots/Figure S3 - biomass components.png",
   width = 16,
   height = 18,
   units = "cm"
@@ -3027,7 +3027,7 @@ ggsave(
 
 ggsave(
   plot_biomass_components,
-  filename = "plots/Figure S7 - biomass components.pdf",
+  filename = "plots/Figure S3 - biomass components.pdf",
   width = 16,
   height = 18,
   units = "cm"
@@ -3060,7 +3060,7 @@ DTM_error_SD <- round(sd(DTM_accuracy$z_error), 3)
 # save plot
 ggsave(
   plot_terrain_error,
-  filename = "plots/Figure S5 - DTM error.png",
+  filename = "plots/Figure S7 - DTM error.png",
   width = 16,
   height = 18,
   units = "cm"
@@ -3068,7 +3068,7 @@ ggsave(
 
 ggsave(
   plot_terrain_error,
-  filename = "plots/Figure S5 - DTM error.pdf",
+  filename = "plots/Figure S7 - DTM error.pdf",
   width = 16,
   height = 18,
   units = "cm"
@@ -3209,7 +3209,7 @@ df_biomass_est <- data.frame("Raster" = c("CHM",
 # Export total biomass estimates
 write.csv(df_biomass_est,"tables/Table 3 Biomass estimates.csv", row.names = FALSE)            # extracted NDVI values were added to the main_database file. ndvi_data <- read.csv("data/Extracted_NDVI.csv", header = T)                  # Read in NDVI values from Exact Extract pipeline.
 
-# TEMP - write clipped rasters for development ----
+## write clipped rasters to faciliate sharing
 # writeRaster(rast_AOI_CHM, "data/site_rasters/rast_AOI_CHM.tif")
 # writeRaster(rast_AOI_RGB, "data/site_rasters/rast_AOI_RGB.tif")
 # writeRaster(rast_AOI_NDVI_018, "data/site_rasters/rast_AOI_NDVI_018.tif")
@@ -3219,33 +3219,22 @@ write.csv(df_biomass_est,"tables/Table 3 Biomass estimates.csv", row.names = FAL
 
 
 ### Calculate biomass difference rasters
-# TO FINISH ----
-# Calcualting difference maps requires rasters with the same resolution (and alignment)
-# I think our aim here should be to purely to illustrate the spatial distribution of differences,
-# which are on the order of 25%-70% overall so are pretty large relative to minor errors in resampling.
-# I'm prettry sure resampling (raster::resample with bilinear) is the way to go here, 
-# but I can't work out how to specify a resolution (e.g. 0.2 m?) Do we HAVE to simply use the resolution of the coarsest raster? 
-#res(rast_Biomass_NDVI_121) ?
-
-# new_rast <- (raster::resample(rast1, rast2, method="bilinear")  #resample rast1 to match rast 2... # for bilinear interpolation
-
-# Jakob: You're on the right track here, like you said it's a bit more 
-# complicated one would wish for. I think going for 0.2 m is a good idea. 
-# Bi-linear resampling introduces less uncertainties if we also aggregate a bit
-# annd we wanna make sure that the new rsolution is almost a multiple of the
-# smaller resolutions. So 0.2 m or even 0.25 m would work well. 
+# Calcualting difference maps requires rasters with identical resolution and 
+# alignment. Our aim here is illustrate the spatial distribution of differences
+# in estimated biomass (which are on the order of 25%-70%, so are pretty large 
+# relative to errors expected from resampling. Bi-linear resampling introduces 
+# less uncertainty if we also aggregate a bit and we wanna make sure that the 
+# new resolution is almost a multiple of the smaller resolutions.
 # Checking out the relative rest of the division (using modulo)
-(200%%c(18,47,119,121)) / c(18,47,119,121)
-(250%%c(18,47,119,121)) / c(18,47,119,121)
-# with 250 we would end up with less bilinear resampling for the coarser resolution,
+(200%%c(18,47,119,121)) / c(18,47,119,121)  # 0.2 m
+(250%%c(18,47,119,121)) / c(18,47,119,121)  # 0.25 m
+
+# 0.25 m would end up with less bilinear resampling for the coarser resolution,
 # the relative remainder for the smaller resolution is larger, but we also 
-# aggregate across more pixels of those, so the error will be smaler. I'd say 
-# let's go for 0.25 m! 
+# aggregate across more pixels of those, so the error will be smaller, so we're
+# going for 0.25 m. 
 
-# Indeed the trick in R is  to create an empty target raster with the
-# desired properties and then resample into  that. 
-
-
+# Ceate an empty target raster with the desired properties and then resample to that. 
 
 # Create vector with raster names for convenience in handling later
 raster_names <- c("rast_Biomass_CHM", 
@@ -3265,10 +3254,9 @@ lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@xmax))
 lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@ymin))
 lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@ymax))
 
-# We solve this by trimming the edges, this will introduce even further 
-# inaccuracies in the re-sampling, but nothing we can do about it!
-# (looking at those differences, I guess we could also just re-sample to 0.2 m,
-# but let's stick to the plan)
+# We solvesd this by trimming the edges, this introduce more error in the
+# re-sampling, but can't easily be avoided. (looking at those differences, we
+# could also just re-sample to 0.2 m, but let's stick to the 0.25 m planned).
 target_raster <- raster(xmn = 581926.75,
                         xmx = 582040.50,
                         ymn = 7719550.50,
@@ -3297,11 +3285,10 @@ list2env(
 # levelplot(rast_Biomass_NDVI_018_coarse)
 # levelplot(rast_Biomass_NDVI_018_coarse_diff)
 
-### Final figure for the manuscript with these 15 rasters together (3 cols x 5 rows)
-# planning to include the RGB image in the empty space left because the CHM is not differenced against itself.
 
-# TO FINISH: ----
-# 1) how to put these together nicely? (Patchwork doesn't work with these plot objects, and par is just yuk.
+### Final figure for publication with  15 rasters together (3 cols x 5 rows)
+# Include the RGB image in the empty space left because the CHM is not differenced against itself.
+
 # Jakob: Plotting rasters in R beautifully took me a while to work out
 # ggplot can handle rasters well, but it's ability to do so well is still developing
 # Most people I know use the rasterVis package
@@ -3344,8 +3331,8 @@ rasters_to_plot <- data.frame(
                     "Biomass (mg)",
                     "none",
                     rep(c("NDVI",
-                          "Biomass (mg)",
-                          "Δ Biomass (mg)"), 4)),
+                          "Biomass (g m2)",
+                          "Δ Biomass (g m2)"), 4)),
   col_ramp_min = c(0,0,NA, 
                    rep(c(0,0,-3000), 4)), # Minimum scale values
   col_ramp_max = c(1.4,3500,NA,
@@ -3393,9 +3380,8 @@ plot_pretty_raster <- function(raster_name) {
   
    # If RGB raster do the following
   if(plot_type == "rgb") {
-    # throw out alpha band
-    raster_to_plot <- raster_to_plot[[1:3]]
-    # It's huge, so when trying layout changes aggregate to a sensible res first
+    raster_to_plot <- raster_to_plot[[1:3]]  # throw out alpha band
+    # It is huge, so when trying layout changes aggregate to a sensible res first
     # raster_to_plot <- raster::aggregate(raster_to_plot, 5)
     # To use lattice (for compatibility with the other raster plots) we
     # need to create the RGB colourspace ourselves.
@@ -3422,15 +3408,15 @@ plot_pretty_raster <- function(raster_name) {
       latticeExtra::layer({
         ## Scale bar
         # Determine position of scale bar (bottom left corner)
-        scale_bar_length <- 20 # Scale bar lenght 20 m
-        scale_bar_height <- 2.5 # scale baer height 2.5m (seeme like a good start for 50 m height raster)
+        scale_bar_length <- 20 # Scale bar length 20 m
+        scale_bar_height <- 2.5 # scale bar height 2.5 m (seeme like a good start for 50 m height raster)
         scale_bar_nsegments <- 2 # 4 segments
         scale_bar_xpos <- 10 # x position from bottom left corner in percent
         scale_bar_ypos <- 10 # y position from bottom left corner in percent
         scale_bar_col <- rasters_to_plot$scale_bar_col[rasters_to_plot$raster_name == raster_name]
         
         # calculate derived parameters:
-        # (there is a bug in lettice so we need to shove it into the global enviornment)
+        # (there is a bug in lattice so we need to shove it into the global enviornment)
         scale_bar_xmin <- extent(raster_to_plot[[1]])@xmin + 
           ((extent(raster_to_plot[[1]])@xmax -
               extent(raster_to_plot[[1]])@xmin) / 100 * scale_bar_xpos)
@@ -3550,7 +3536,7 @@ pretty_plot_list <- lapply(rasters_to_plot$raster_name,
                        plot_pretty_raster)
 
 # Export PNG for plot grid
-png("plots/Figure X Biomass Maps.png", 
+png("plots/Figure 6 Biomass Maps.png", 
     width = 7 * 3,
     height = 3 * 5,
     units = "in",
@@ -3559,6 +3545,9 @@ print(grid.arrange(grobs = pretty_plot_list,
                    ncol = 3))
 dev.off()
 
+
+### Compare distributions of NDVI values ----
+# Observed in biomass sample versus observed in monitoring plot.
 # TO FINISH:  ----
 # To illustrate how (non)representative our sampled harvest plots were of the 
 # range of NDVI values encountered in the upscaled monitoirng area, perhaps it
