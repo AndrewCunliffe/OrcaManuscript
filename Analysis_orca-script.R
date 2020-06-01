@@ -3327,12 +3327,12 @@ rasters_to_plot <- data.frame(
                  rep(c("ndvi",
                        "biomass",
                        "diff"), 4)),
-  col_ramp_title = c("Canopy Height (m)",
-                    "Biomass (mg)",
-                    "none",
-                    rep(c("NDVI",
-                          "Biomass (g m2)",
-                          "Δ Biomass (g m2)"), 4)),
+  col_ramp_title = c("'Canopy Height (m)'",
+                    "'Biomass (g m' ^ -2 * ')'",
+                    "'none'",
+                    rep(c("'NDVI'",
+                          "'Biomass (g m' ^ -2 * ')'",
+                          "'Δ Biomass (g m' ^ -2 * ')'"), 4)),
   col_ramp_min = c(0,0,NA, 
                    rep(c(0,0,-3000), 4)), # Minimum scale values
   col_ramp_max = c(1.4,3500,NA,
@@ -3358,9 +3358,6 @@ rasters_to_plot <- data.frame(
                          "Biomass NDVI (0.121 m)",
                          "Diff. Biomass SfM - NDVI (0.121 m)")),
   panel_label_xpos = rep(c(0.07,0.07, 0.06),5),
-  scale_bar_col = c("white", "white", "white",
-                    "black", "white", "black",
-                    rep(c("black", "black", "black"), 3)),
   stringsAsFactors = F)
 
 # Generate colour ramps with the colorspace package
@@ -3430,16 +3427,17 @@ plot_pretty_raster <- function(raster_name) {
         grid.rect(x = xs[1:(length(xs)-1)],
                   y = scale_bar_ymin,
                   width = scale_bar_step, height=scale_bar_height,
-                  gp= gpar(fill = rep(c('transparent', scale_bar_col),
+                  gp= gpar(fill = rep(c('transparent', "white"),
                                       2),
-                           col = scale_bar_col),
+                           col = "white"),
                   default.units='native')
         grid.text(x = xs - (scale_bar_step / 2), 
                   y = scale_bar_ymin + scale_bar_height * 1.5,
                   paste(seq(0, scale_bar_length, scale_bar_step), "m"),
-                  gp=gpar(cex=0.8, col = scale_bar_col),
+                  gp=gpar(cex=0.8, col = "white"),
                   default.units='native')
-      }, data = list(raster_name = raster_name)) # + 
+      }, data = list(raster_name = raster_name,
+                     raster_to_plot = raster_to_plot)) # + 
     #### Add north arrow (can be replaced with any polygon, this one is ugly)
     # latticeExtra::layer({
     #   SpatialPolygonsRescale(layout.north.arrow(),
@@ -3447,7 +3445,7 @@ plot_pretty_raster <- function(raster_name) {
     #                                     scale_bar_ymin),
     #                          scale = scale_bar_height * 2)
     #   theme = list(col.regions = "white")
-    # }) +
+    # }) 
   } else { # else....
     # Set color ramp
     col_ramp <- get(paste0(plot_type, "_col"))
@@ -3468,54 +3466,16 @@ plot_pretty_raster <- function(raster_name) {
                                                   col_scale_step), 
                                            font=1, cex = 1)  # Colorkey axis text
                              ),    
-                             legend=list(top=list(fun=grid::textGrob(col_key_label, y=1.1, x=1.07),
-                                                  cex = 1)),
+                             legend=list(
+                               top=list(
+                                 fun=grid::textGrob(
+                                   parse(text = col_key_label),
+                                   y=1.1, 
+                                   x=1.07),
+                                 cex = 1)),
                              scales=list(draw=FALSE),            # suppress axis labels
                              col.regions=col_ramp,                   # colour ramp
-                             at=seq(col_scale_min, col_scale_max, length.out = 100)) + 
-      latticeExtra::layer({
-        ## Scale bar
-        # Determine position of scale bar (bottom left corner)
-        scale_bar_length <- 20 # Scale bar lenght 20 m
-        scale_bar_height <- 2.5 # scale baer height 2.5m (seeme like a good start for 50 m height raster)
-        scale_bar_nsegments <- 2 # 4 segments
-        scale_bar_xpos <- 10 # x position from bottom left corner in percent
-        scale_bar_ypos <- 10 # y position from bottom left corner in percent
-        scale_bar_col <- rasters_to_plot$scale_bar_col[rasters_to_plot$raster_name == raster_name]
-        
-        # calculate derived parameters:
-        # (there is a bug in lettice so we need to shove it into the global enviornment)
-        scale_bar_xmin <- extent(raster_to_plot[[1]])@xmin + 
-          ((extent(raster_to_plot[[1]])@xmax -
-              extent(raster_to_plot[[1]])@xmin) / 100 * scale_bar_xpos)
-        scale_bar_xmax <- scale_bar_xmin + scale_bar_length 
-        scale_bar_ymin <- extent(raster_to_plot[[1]])@ymin + 
-          ((extent(raster_to_plot[[1]])@ymax -
-              extent(raster_to_plot[[1]])@ymin) / 100 * scale_bar_ypos)
-        scale_bar_step <- scale_bar_length / scale_bar_nsegments
-        
-        xs <- seq(scale_bar_xmin, scale_bar_xmax, scale_bar_step)
-        grid.rect(x = xs[1:(length(xs)-1)],
-                  y = scale_bar_ymin,
-                  width = scale_bar_step, height=scale_bar_height,
-                  gp= gpar(fill = rep(c('transparent', scale_bar_col),
-                                      2),
-                           col = scale_bar_col),
-                  default.units='native')
-        grid.text(x = xs - (scale_bar_step / 2), 
-                  y = scale_bar_ymin + scale_bar_height * 1.5,
-                  paste(seq(0, scale_bar_length, scale_bar_step), "m"),
-                  gp=gpar(cex=0.8, col = scale_bar_col),
-                  default.units='native')
-      }, data = list(raster_name = raster_name)) # + 
-    #### Add north arrow (can be replaced with any polygon, this one is ugly)
-    # latticeExtra::layer({
-    #   SpatialPolygonsRescale(layout.north.arrow(),
-    #                          offset = c(scale_bar_xmin + scale_bar_length * 1.1,
-    #                                     scale_bar_ymin),
-    #                          scale = scale_bar_height * 2)
-    #   theme = list(col.regions = "white")
-    # }) +
+                             at=seq(col_scale_min, col_scale_max, length.out = 100))
   }
   # Add label to top left
   panel_label <- rasters_to_plot$panel_label[rasters_to_plot$raster_name == raster_name]
