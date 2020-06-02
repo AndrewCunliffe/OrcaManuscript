@@ -10,7 +10,6 @@ library(tidyverse)
 library(viridis)
 library(grid)                                                                   # required for plot annotation
 library(gridExtra)                                                              # for arranging multi-panel plots
-#library(xlsx)
 library(ggpubr)
 library(ggplot2)
 library(DescTools)                                                              # for computing CCC
@@ -27,8 +26,11 @@ library(raster)                                                                 
 library(rgdal)
 library(sp)
 library(miscTools)
-library(patchwork)
+library(patchwork)                                                              # For arranging multi-panel plots
 library(modelr)
+library(rasterVis)                                                              # For visualising rasters
+library(gridExtra)                                                              # for arranging pulti-panel raster plot
+library(colorspace)                                                             # Generate colour ramps with the colorspace package
 
 
 # Plotting theme
@@ -3228,13 +3230,11 @@ write.csv(df_biomass_est,"tables/Table 3 Biomass estimates.csv", row.names = FAL
 # Checking out the relative rest of the division (using modulo)
 (200%%c(18,47,119,121)) / c(18,47,119,121)  # 0.2 m
 (250%%c(18,47,119,121)) / c(18,47,119,121)  # 0.25 m
-
 # 0.25 m would end up with less bilinear resampling for the coarser resolution,
 # the relative remainder for the smaller resolution is larger, but we also 
 # aggregate across more pixels of those, so the error will be smaller, so we're
 # going for 0.25 m. 
 
-# Ceate an empty target raster with the desired properties and then resample to that. 
 
 # Create vector with raster names for convenience in handling later
 raster_names <- c("rast_Biomass_CHM", 
@@ -3254,16 +3254,17 @@ lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@xmax))
 lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@ymin))
 lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@ymax))
 
-# We solvesd this by trimming the edges, this introduce more error in the
+# We solved this by trimming the edges, this introduces more error in the
 # re-sampling, but can't easily be avoided. (looking at those differences, we
 # could also just re-sample to 0.2 m, but let's stick to the 0.25 m planned).
+# Ceate an empty target raster with the desired properties and then resample to that. 
 target_raster <- raster(xmn = 581926.75,
                         xmx = 582040.50,
                         ymn = 7719550.50,
                         ymx = 7719597.00,
                         crs = crs(rast_AOI_CHM),
                         res = 0.25)
-# The rest is easy:
+
 list2env(
   lapply(setNames(raster_names,
                 paste0(raster_names, "_coarse")),
@@ -3285,24 +3286,45 @@ list2env(
 # levelplot(rast_Biomass_NDVI_018_coarse)
 # levelplot(rast_Biomass_NDVI_018_coarse_diff)
 
+png("plots/Figure S8.png")
+par(mfrow = c(2, 2)) 
+
+hist(rast_Biomass_NDVI_018_coarse_diff,
+     main="Biomass residuals (NDVI 0.018m)",
+     xlab="Diff. Biomass CHM - NDVI (g m2)",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(-3000,2000))
+
+hist(rast_Biomass_NDVI_047_coarse_diff,
+     main="Biomass residuals (NDVI 0.047m)",
+     xlab="Diff. Biomass CHM - NDVI (g m2)",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(-3000,2000))
+
+hist(rast_Biomass_NDVI_119_coarse_diff,
+     main="Biomass residuals (NDVI 0.119m)",
+     xlab="Diff. Biomass CHM - NDVI (g m2)",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(-3000,2000))
+
+hist(rast_Biomass_NDVI_121_coarse_diff,
+     main="Biomass residuals (NDVI 0.121m)",
+     xlab="Diff. Biomass CHM - NDVI (g m2)",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(-3000,2000))
+dev.off()
+par(mfrow = c(1, 1)) 
+
 
 ### Final figure for publication with  15 rasters together (3 cols x 5 rows)
 # Include the RGB image in the empty space left because the CHM is not differenced against itself.
-
-# Jakob: Plotting rasters in R beautifully took me a while to work out
 # ggplot can handle rasters well, but it's ability to do so well is still developing
-# Most people I know use the rasterVis package
-# install.packages("rasterVis")
-library(rasterVis)
-# which uses lattice plots that can be arranged into multiple grobs with gridExtra
-# install.packages("gridExtra")
-library(gridExtra)
-# 2) set the scale limits of NDVI to facilitate comparison (from 0 to 1)
-# 3) set the scale limits of biomass to facilitate comparison (from 0 to at least 3500 g m^2)
-# 4) Consider using different colour scalar for the NDVI vs. biomass vs. biomass difference plots, to aid interpretation that these are differnt metrics.
-# 5) need scaler legends for: 1) canopy height (m), 2) NDVI, 3) biomass, 4) biomass difference
-# 6) need scale bar.
-# Jakob: This can all be nicely done with levelplot from the rasterVis package
+# Most people use the rasterVis package which uses lattice plots that can be arranged into multiple grobs with gridExtra
+# This can all be nicely done with levelplot from the rasterVis package
 
 # Create dataframe of rasters to plot
 rasters_to_plot <- data.frame(
@@ -3347,22 +3369,20 @@ rasters_to_plot <- data.frame(
                          "RGB",
                          "NDVI (0.018 m)",
                          "Biomass NDVI (0.018 m)",
-                         "Diff. Biomass SfM - NDVI (0.018 m)",
+                         "Diff. Biomass CHM - NDVI (0.018 m)",
                          "NDVI (0.047 m)",
                          "Biomass NDVI (0.047 m)",
-                         "Diff. Biomass SfM - NDVI (0.047 m)",
+                         "Diff. Biomass CHM - NDVI (0.047 m)",
                          "NDVI (0.119 m)",
                          "Biomass NDVI (0.119 m)",
-                         "Diff. Biomass SfM - NDVI (0.119 m)",
+                         "Diff. Biomass CHM - NDVI (0.119 m)",
                          "NDVI (0.121 m)",
                          "Biomass NDVI (0.121 m)",
-                         "Diff. Biomass SfM - NDVI (0.121 m)")),
+                         "Diff. Biomass CHM - NDVI (0.121 m)")),
   panel_label_xpos = rep(c(0.07,0.07, 0.06),5),
   stringsAsFactors = F)
 
 # Generate colour ramps with the colorspace package
-# install.packages("colorspace")
-library(colorspace)
 chm_col <- sequential_hcl(100, palette = "Blues")
 ndvi_col <- sequential_hcl(100, palette = "Oranges")
 biomass_col <- sequential_hcl(100, palette = "Greens")
@@ -3504,6 +3524,7 @@ png("plots/Figure 6 Biomass Maps.png",
 print(grid.arrange(grobs = pretty_plot_list,
                    ncol = 3))
 dev.off()
+
 
 
 ### Compare distributions of NDVI values ----
