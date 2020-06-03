@@ -367,7 +367,7 @@ model_heights_mixed <-
     data = height_data
   )
 
-# Warnings - probably didn't converge properly
+# Warnings - model  didn't converge properly
 summary(model_heights_mixed)
 
 # Predictions plot flat line - probably because model didn't converge
@@ -549,11 +549,16 @@ model_SfM <-
   lm(AGB_spatially_normalised_g_m2 ~ HAG_plotmean_of_cellmax_m + 0,
      data = dataset)  # constrained intercept
 
+summary(model_PFu)
+summary(model_SfMu)
+
+
 # Tabulate and export model parameters
 model_list <- list(model_PFu)
 model_results1 <- bind_rows(lapply(model_list, function(model) {
-  model_glance <- broom::glance(model)
   model_tidy <- broom::tidy(model)
+  model_argument <- broom::augment(model)
+  model_glance <- broom::glance(model)
   return(
     data.frame(
       Canopy_height_method = "Point Framing",
@@ -569,7 +574,8 @@ model_results1 <- bind_rows(lapply(model_list, function(model) {
         round(model_tidy$std.error[1], 1)
       ),
       r2 = round(model_glance$r.squared, 2),
-      resid = round(model_glance$sigma, 3),
+      RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 1),
+      # resid = round(model_glance$sigma, 3),
       stringsAsFactors = F
     )
   )
@@ -578,8 +584,9 @@ model_results1 <- bind_rows(lapply(model_list, function(model) {
 
 model_list <- list(model_PF)
 model_results2 <- bind_rows(lapply(model_list, function(model) {
-  model_glance <- broom::glance(model)
   model_tidy <- broom::tidy(model)
+  model_argument <- broom::augment(model)
+  model_glance <- broom::glance(model)
   return(
     data.frame(
       Canopy_height_method = "Point Framing",
@@ -591,7 +598,8 @@ model_results2 <- bind_rows(lapply(model_list, function(model) {
       ),
       b = paste0("0"),
       r2 = round(model_glance$r.squared, 2),
-      resid = round(model_glance$sigma, 3),
+      RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 1),
+      # resid = round(model_glance$sigma, 3),
       stringsAsFactors = F
     )
   )
@@ -600,8 +608,9 @@ model_results2 <- bind_rows(lapply(model_list, function(model) {
 
 model_list <- list(model_SfMu)
 model_results3 <- bind_rows(lapply(model_list, function(model) {
-  model_glance <- broom::glance(model)
   model_tidy <- broom::tidy(model)
+  model_argument <- broom::augment(model)
+  model_glance <- broom::glance(model)
   return(
     data.frame(
       Canopy_height_method = "Photogrammetry",
@@ -617,7 +626,8 @@ model_results3 <- bind_rows(lapply(model_list, function(model) {
         round(model_tidy$std.error[1], 1)
       ),
       r2 = round(model_glance$r.squared, 2),
-      resid = round(model_glance$sigma, 3),
+      RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 1),
+      # resid = round(model_glance$sigma, 3),
       stringsAsFactors = F
     )
   )
@@ -626,8 +636,9 @@ model_results3 <- bind_rows(lapply(model_list, function(model) {
 
 model_list <- list(model_SfM)
 model_results4 <- bind_rows(lapply(model_list, function(model) {
-  model_glance <- broom::glance(model)
   model_tidy <- broom::tidy(model)
+  model_argument <- broom::augment(model)
+  model_glance <- broom::glance(model)
   return(
     data.frame(
       Canopy_height_method = "Photogrammetry",
@@ -639,7 +650,8 @@ model_results4 <- bind_rows(lapply(model_list, function(model) {
       ),
       b = paste0("0"),
       r2 = round(model_glance$r.squared, 2),
-      resid = round(model_glance$sigma, 3),
+      RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 1),
+      # resid = round(model_glance$sigma, 3),
       stringsAsFactors = F
     )
   )
@@ -916,8 +928,36 @@ exp_model_results <- bind_rows(lapply(exp_models, function(model) {
   )
 }))
 
+
+
+# Tabulate model parameters
+exp_model_results <- bind_rows(lapply(exp_models, function(model) {
+  model_tidy <- broom::tidy(model)
+  model_argument <- broom::augment(model)
+  model_glance <- broom::glance(model)
+  return(
+    data.frame(
+      ndvi_grain = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
+      model_form = "Y = a e(b X)",
+      a = paste0(
+        round(model_tidy$estimate[2], 3),
+        " ± ",
+        round(model_tidy$std.error[2], 3)
+      ),
+      b = paste0(
+        round(model_tidy$estimate[1], 3),
+        " ± ",
+        round(model_tidy$std.error[1], 3)
+      ),
+      RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 1),
+      # resid = round(model_glance$sigma, 3),
+      stringsAsFactors = F
+    )
+  )
+}))
+
 # Export model parameters to table
-write.csv(exp_model_results, file = "tables/Table 2 exp model fits.csv", row.names = F)
+write.csv(exp_model_results, file = "tables/Table S2 exp model fits.csv", row.names = F)
 
 
 # Visualisation
@@ -1460,10 +1500,12 @@ log_models <- list(
   log_model_leaf_NDVI_018
 )
 
+
 # Tabulate model parameters
 log_model_results <- bind_rows(lapply(log_models, function(model) {
-  model_glance <- broom::glance(model)
   model_tidy <- broom::tidy(model)
+  model_argument <- broom::augment(model)
+  model_glance <- broom::glance(model)
   return(
     data.frame(
       ndvi_grain = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
@@ -1479,7 +1521,8 @@ log_model_results <- bind_rows(lapply(log_models, function(model) {
         round(model_tidy$std.error[1], 3)
       ),
       r2 = round(model_glance$r.squared, 2),
-      resid = round(model_glance$sigma, 3),
+      RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 4),
+      # resid = round(model_glance$sigma, 3),
       stringsAsFactors = F
     )
   )
@@ -3525,20 +3568,6 @@ print(grid.arrange(grobs = pretty_plot_list,
                    ncol = 3))
 dev.off()
 
-
-
-### Compare distributions of NDVI values ----
-# Observed in biomass sample versus observed in monitoring plot.
-# TO FINISH:  ----
-# To illustrate how (non)representative our sampled harvest plots were of the 
-# range of NDVI values encountered in the upscaled monitoirng area, perhaps it
-# would be nice to produce a density plots of NDVI values for (each) biomass 
-# harvest plot and the monitoring area.
-
-# Jakob: Sounds like a good plan! This could be quickly done by extracting
-# the NDVI values using an exctract funcion or getValues then get the density
-# plots from the dataframes using gpplot. 
-# I've run out of time for today, but let me know if you need help with this also!
 
 
 

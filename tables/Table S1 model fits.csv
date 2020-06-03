@@ -1,5 +1,5 @@
-"Canopy_height_method","model_form","a","b","r2","resid"
-"Point Framing","Y = a X + b","3539.8 ± 345.8","31.5 ± 112.2",0.76,350.745
-"Point Framing","Y = a X","3622.8 ± 177.7","0",0.92,346.1
-"Photogrammetry","Y = a X + b","2864.3 ± 326.4","-174.8 ± 150.2",0.69,392.173
-"Photogrammetry","Y = a X","2522.3 ± 142.7","0",0.9,394.153
+"Canopy_height_method","model_form","a","b","r2","RMSE"
+"Point Framing","Y = a X + b","3539.8 ± 345.8","31.5 ± 112.2",0.76,340.9
+"Point Framing","Y = a X","3622.8 ± 177.7","0",0.92,341.3
+"Photogrammetry","Y = a X + b","2864.3 ± 326.4","-174.8 ± 150.2",0.69,381.1
+"Photogrammetry","Y = a X","2522.3 ± 142.7","0",0.9,388.6
