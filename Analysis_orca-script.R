@@ -31,6 +31,7 @@ library(modelr)
 library(rasterVis)                                                              # For visualising rasters
 library(gridExtra)                                                              # for arranging pulti-panel raster plot
 library(colorspace)                                                             # Generate colour ramps with the colorspace package
+library(scales)                                                                 # To include alpha on base plots
 
 
 # Plotting theme
@@ -3159,78 +3160,176 @@ rast_AOI_RGB <- crop(rast_RGB, AOI)
 # rast_AOI_NDVI_121<- raster("data/site_rasters/rast_AOI_NDVI_121.tif")
 
 # Review value distributions
-hist(rast_AOI_CHM,
-     main="Distribution of canopy height Values",
-     xlab="Canopy height (m)",
-     ylab="Frequency",
-     col="grey")
+# hist(rast_AOI_CHM,
+#      main="Distribution of canopy height Values",
+#      xlab="Canopy height (m)",
+#      ylab="Frequency",
+#      col="grey")
+# 
+# hist(rast_AOI_NDVI_018,
+#      main="Distribution of NDVI Values (0.018m)",
+#      xlab="NDVI",
+#      ylab="Frequency",
+#      col="grey",
+#      xlim = c(0,1))
+# 
+# hist(rast_AOI_NDVI_047,
+#      main="Distribution of NDVI Values (0.047m)",
+#      xlab="NDVI",
+#      ylab="Frequency",
+#      col="grey",
+#      xlim = c(0,1))
+# 
+# hist(rast_AOI_NDVI_119,
+#      main="Distribution of NDVI Values (0.119m)",
+#      xlab="NDVI",
+#      ylab="Frequency",
+#      col="grey",
+#      xlim = c(0,1))
+# 
+# hist(rast_AOI_NDVI_121,
+#      main="Distribution of NDVI Values (0.121m)",
+#      xlab="NDVI",
+#      ylab="Frequency",
+#      col="grey",
+#      xlim = c(0,1))
 
-hist(rast_AOI_NDVI_018,
-     main="Distribution of NDVI Values (0.018m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
 
-hist(rast_AOI_NDVI_047,
-     main="Distribution of NDVI Values (0.047m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
 
-hist(rast_AOI_NDVI_119,
-     main="Distribution of NDVI Values (0.119m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
 
-hist(rast_AOI_NDVI_121,
-     main="Distribution of NDVI Values (0.121m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
+
+
+
+
+### Review value distributions in our two samples (harvest plots and monitoring plot)
+## CHM
+
+density(rast_AOI_CHM, main="CHM (m)", col="blue", xlab='Canopy Height (m)', plot=TRUE)
+
+# query all of the  (SFM) canopy heights sampled in all plots
+
+feature_filename <- paste0(home, "data/20160725_AC_ORC - formated for exact extractr.geojson")
+plots <- st_read(feature_filename, crs = 32607)                               # Import geoJSON as sf object, using st_read to allow the non-standard CRS to be specified.
+
+# Extract vector of values for each harvest plot
+# vector_plot_CHM <- raster::extract(rast_CHM, plots)  # Extract is very slow
+# vector_plot_CHM <- exact_extract(rast_CHM, plots)  # Fast
+# 
+# 
+# ggdensity(vector_plot_CHM)
+# 
+# density(vector_plot_CHM, main="CHM", col="blue", xlab='', plot=TRUE)
+# 
+# str(vector_plot_CHM)
+# 
+# plot(rast_plot_CHM)
+# 
+# names(rast_plot_CHM)
+
+
+
+
+# will thie return a vector of vlaues?
+
+
+str(test_exactextract)
+
+#   # Calculate mean NDVI for each polygon
+#   plots$mean_NDVI_018 <- exact_extract(raster_018, plots, 'mean')
+#   plots$mean_NDVI_047 <- exact_extract(raster_047, plots, 'mean')
+#   plots$mean_NDVI_119 <- exact_extract(raster_119, plots, 'mean')
+#   plots$mean_NDVI_121 <- exact_extract(raster_121, plots, 'mean')
+#
+#   # Tidy dataframe
+#   plots_df <- st_drop_geometry(plots)                                           # Create dataframe from simple features object (dropping geometry).
+#   plots_df$EPSG <- NULL                                                         # Remove unecessary EPSG column from dataframe.
+#   plots_df <- plots_df[order(plots_df$PlotID),]                                 # Order dataframe by PlotID.
+#
+#   # Export NDVI values
+#   write.csv(plots_df,"data/Extracted_NDVI.csv", row.names = FALSE)            # extracted NDVI values were added to the main_database file. ndvi_data <- read.csv("data/Extracted_NDVI.csv", header = T)                  # Read in NDVI values from Exact Extract pipeline.
+
+
+
+# Density plot
+density(rast_AOI_NDVI_018, main="NDVI 0.018", col="blue", xlab='NDVI', plot=TRUE)
+density(rast_AOI_NDVI_047, main="NDVI 0.047", col="blue", xlab='NDVI', plot=TRUE)
+density(rast_AOI_NDVI_119, main="NDVI 0.191", col="blue", xlab='NDVI', plot=TRUE)
+density(rast_AOI_NDVI_121, main="NDVI 0.121", col="blue", xlab='NDVI', plot=TRUE)
+
+
+rasterVis::densityplot(rast_AOI_NDVI_018, xlab='NDVI')
+
+
+
 
 
 # compute mean canopy height
 meanCH <- exact_extract(rast_AOI_CHM, AOI, 'mean')                              # USed exact_extract because raster::extract is much slower.
 
 
-# calculate biomass maps (units in g m^2 per pixel, to facilitate comparison between different spatial grain protucts)
+# calculate biomass maps (units in g m^2 per pixel, to facilitate comparison between different spatial grain products)
+# Use standard error or model coefficients to propogate some of the uncertanty in biomass estimate
 rast_Biomass_CHM <- rast_AOI_CHM * model_SfM$coefficients[1] 
+rast_Biomass_CHM_upper <- rast_AOI_CHM * (model_SfM$coefficients[1] + coef(summary(model_SfM))[, "Std. Error"])
+rast_Biomass_CHM_lower <- rast_AOI_CHM * (model_SfM$coefficients[1] - coef(summary(model_SfM))[, "Std. Error"])
+
 rast_Biomass_NDVI_018 <- coef(exp_model_total_NDVI_018)[1] * exp(coef(exp_model_total_NDVI_018)[2] * rast_AOI_NDVI_018)
+rast_Biomass_NDVI_018_upper <- (coef(exp_model_total_NDVI_018)[1] + coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_018)[2] + coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][2])
+ * rast_AOI_NDVI_018)
+rast_Biomass_NDVI_018_lower <- (coef(exp_model_total_NDVI_018)[1] - coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_018)[2] - coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][2])
+     * rast_AOI_NDVI_018)
+
+
+
 rast_Biomass_NDVI_047 <- coef(exp_model_total_NDVI_047)[1] * exp(coef(exp_model_total_NDVI_047)[2] * rast_AOI_NDVI_047)
 rast_Biomass_NDVI_119 <- coef(exp_model_total_NDVI_119)[1] * exp(coef(exp_model_total_NDVI_119)[2] * rast_AOI_NDVI_119)
 rast_Biomass_NDVI_121 <- coef(exp_model_total_NDVI_121)[1] * exp(coef(exp_model_total_NDVI_121)[2] * rast_AOI_NDVI_121)
 
 
-# Calculate total biomass in each raster, and convert to standard units (Mg ha-1)
+# Calculate total biomass in each raster
 Biomass_CHM_gm2 <- 
   round(cellStats(rast_Biomass_CHM, 'sum') / ncell(rast_Biomass_CHM), 1)                  # mean biomass in g m-2
-Biomass_CHM_Mgha <- 
-  round(cellStats(rast_Biomass_CHM, 'sum') / ncell(rast_Biomass_CHM) / 100, 2)                                                       # mean biomass in Mg ha-1
+Biomass_CHM_gm2_upper <- 
+  round(cellStats(rast_Biomass_CHM_upper, 'sum') / ncell(rast_Biomass_CHM_upper), 1)                  # mean biomass in g m-2
+Biomass_CHM_gm2_lower <- 
+  round(cellStats(rast_Biomass_CHM_lower, 'sum') / ncell(rast_Biomass_CHM_lower), 1)                  # mean biomass in g m-2
+
+# Biomass_CHM_Mgha <- 
+#   round(cellStats(rast_Biomass_CHM, 'sum') / ncell(rast_Biomass_CHM) / 100, 2)            # mean biomass in Mg ha-1
+# Biomass_CHM_Mgha_upper <- 
+#   round(cellStats(rast_Biomass_CHM_upper, 'sum') / ncell(rast_Biomass_CHM_upper) / 100, 2)            # mean biomass in Mg ha-1
+# Biomass_CHM_Mgha_lower <- 
+#   round(cellStats(rast_Biomass_CHM_lower, 'sum') / ncell(rast_Biomass_CHM_lower) / 100, 2)            # mean biomass in Mg ha-1
 
 Biomass_NDVI_018_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_018, 'sum') / ncell(rast_Biomass_NDVI_018), 1)        # mean biomass in g m-2
-Biomass_NDVI_018_Mgha <- 
-  round(cellStats(rast_Biomass_NDVI_018, 'sum') / ncell(rast_Biomass_NDVI_018) / 100, 2)                                                   # mean biomass in Mg ha-1
+Biomass_NDVI_018_gm2_upper <- 
+  round(cellStats(rast_Biomass_NDVI_018_upper, 'sum') / ncell(rast_Biomass_NDVI_018_upper), 1)        # mean biomass in g m-2
+Biomass_NDVI_018_gm2_lower <- 
+  round(cellStats(rast_Biomass_NDVI_018_lower, 'sum') / ncell(rast_Biomass_NDVI_018_lower), 1)        # mean biomass in g m-2
+
+
+# Biomass_NDVI_018_Mgha <- 
+#   round(cellStats(rast_Biomass_NDVI_018, 'sum') / ncell(rast_Biomass_NDVI_018) / 100, 2)  # mean biomass in Mg ha-1
 
 Biomass_NDVI_047_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_047, 'sum') / ncell(rast_Biomass_NDVI_047), 1)        # mean biomass in g m-2
 Biomass_NDVI_047_Mgha <- 
-  round(cellStats(rast_Biomass_NDVI_047, 'sum') / ncell(rast_Biomass_NDVI_047) / 100, 2)                                                  # mean biomass in Mg ha-1
+  round(cellStats(rast_Biomass_NDVI_047, 'sum') / ncell(rast_Biomass_NDVI_047) / 100, 2)  # mean biomass in Mg ha-1
 
 Biomass_NDVI_119_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_119, 'sum') / ncell(rast_Biomass_NDVI_119), 1)        # mean biomass in g m-2
 Biomass_NDVI_119_Mgha <- 
-  round(cellStats(rast_Biomass_NDVI_119, 'sum') / ncell(rast_Biomass_NDVI_119) / 100, 2)                                                  # mean biomass in Mg ha-1
+  round(cellStats(rast_Biomass_NDVI_119, 'sum') / ncell(rast_Biomass_NDVI_119) / 100, 2)  # mean biomass in Mg ha-1
 
 Biomass_NDVI_121_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_121, 'sum') / ncell(rast_Biomass_NDVI_121), 1)        # mean biomass in g m-2
 Biomass_NDVI_121_Mgha <- 
-  round(cellStats(rast_Biomass_NDVI_121, 'sum') / ncell(rast_Biomass_NDVI_121) / 100, 2)                                                  # mean biomass in Mg ha-1
+  round(cellStats(rast_Biomass_NDVI_121, 'sum') / ncell(rast_Biomass_NDVI_121) / 100, 2)  # mean biomass in Mg ha-1
+
+
 
 
 # create dataframe of total biomass estimates
@@ -3568,6 +3667,49 @@ print(grid.arrange(grobs = pretty_plot_list,
                    ncol = 3))
 dev.off()
 
+
+
+
+### Canopy height Vs. NDVI ----
+## Comparison requires the rasters to have identical extent and spatial resolution
+## Resample all rasters to the 0.25 m resolution used for the biomass difference maps
+coarse_CHM <- raster::resample (rast_AOI_CHM, target_raster, method="bilinear")
+coarse_NDVI_018 <- raster::resample (rast_AOI_NDVI_018, target_raster, method="bilinear")
+coarse_NDVI_047 <- raster::resample (rast_AOI_NDVI_047, target_raster, method="bilinear")
+coarse_NDVI_119 <- raster::resample (rast_AOI_NDVI_119, target_raster, method="bilinear")
+coarse_NDVI_121 <- raster::resample (rast_AOI_NDVI_121, target_raster, method="bilinear")
+
+## Estimate canopy height from NDVI using the equation from Bartsch et al., 2020, converted to m
+coarse_NDVI_018_height <- (0.38 * exp(8.1635 * coarse_NDVI_018))/100
+coarse_NDVI_047_height <- (0.38 * exp(8.1635 * coarse_NDVI_047))/100
+coarse_NDVI_119_height <- (0.38 * exp(8.1635 * coarse_NDVI_119))/100
+coarse_NDVI_121_height <- (0.38 * exp(8.1635 * coarse_NDVI_121))/100
+
+## Create and Export plots
+png("plots/Figure SX - Canopy height vs NDVI.png", 
+    width = 15, height = 15, units = "cm", res = 300)
+par(mfrow=c(2,2))
+plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_047, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.047 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_119, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.119 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_121, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.121 m", col = alpha("black", 0.05))
+
+dev.off()
+
+par(mfrow=c(1,1))
+
+## Create and Export plots
+png("plots/Figure SX - Canopy height vs canopy height from NDVI.png", 
+    width = 15, height = 15, units = "cm", res = 300)
+par(mfrow=c(2,2))
+plot(coarse_CHM, coarse_NDVI_018_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.018 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_047_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.047 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_119_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.119 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_121_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.121 m", col = alpha("black", 0.05))
+
+dev.off()
+
+par(mfrow=c(1,1))
 
 
 
