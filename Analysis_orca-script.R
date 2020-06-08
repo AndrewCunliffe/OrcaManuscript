@@ -3686,7 +3686,7 @@ coarse_NDVI_119_height <- (0.38 * exp(8.1635 * coarse_NDVI_119))/100
 coarse_NDVI_121_height <- (0.38 * exp(8.1635 * coarse_NDVI_121))/100
 
 ## Create and Export plots
-png("plots/Figure SX - Canopy height vs NDVI.png", 
+png("plots/Figure S9 - Canopy height vs NDVI.png", 
     width = 15, height = 15, units = "cm", res = 300)
 par(mfrow=c(2,2))
 plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.05))
@@ -3699,7 +3699,7 @@ dev.off()
 par(mfrow=c(1,1))
 
 ## Create and Export plots
-png("plots/Figure SX - Canopy height vs canopy height from NDVI.png", 
+png("plots/Figure S10 - Canopy height vs canopy height from NDVI.png", 
     width = 15, height = 15, units = "cm", res = 300)
 par(mfrow=c(2,2))
 plot(coarse_CHM, coarse_NDVI_018_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.018 m", col = alpha("black", 0.05))
