@@ -1961,7 +1961,7 @@ ggsave(
       method = "lm",
       formula = y ~ x,
       se = TRUE,
-      size = 0.5,
+      size = 1,
       na.rm = TRUE,
       colour = "black"
     )
@@ -2000,7 +2000,7 @@ ggsave(
       method = "lm",
       formula = y ~ x,
       se = TRUE,
-      size = 0.5,
+      size = 1,
       na.rm = TRUE,
       colour = "black"
     )
@@ -2014,23 +2014,7 @@ ggsave(
                                               ncol = 2, nrow = 1,
                                               align = "h")
 
-# Export figure
-  ggsave(
-    combined_biomass_parts,
-    filename = "plots/Figure 5 - leaf and phytomass vesus biomass.pdf",
-    width = 18,
-    height = 9,
-    units = "cm"
-  )
-  
-  ggsave(
-    combined_biomass_parts,
-    filename = "plots/Figure 5 - leaf and phytomass vesus biomass.png",
-    width = 18,
-    height = 9,
-    units = "cm"
-  )
-  
+
 
 dataset$herb_prop <- dataset$herbacious_biomas / dataset$phytomass
 hist(dataset$herb_prop)
@@ -3160,44 +3144,50 @@ rast_AOI_RGB <- crop(rast_RGB, AOI)
 # rast_AOI_NDVI_121<- raster("data/site_rasters/rast_AOI_NDVI_121.tif")
 
 # Review value distributions
-# hist(rast_AOI_CHM,
-#      main="Distribution of canopy height Values",
-#      xlab="Canopy height (m)",
-#      ylab="Frequency",
-#      col="grey")
-# 
-# hist(rast_AOI_NDVI_018,
-#      main="Distribution of NDVI Values (0.018m)",
-#      xlab="NDVI",
-#      ylab="Frequency",
-#      col="grey",
-#      xlim = c(0,1))
-# 
-# hist(rast_AOI_NDVI_047,
-#      main="Distribution of NDVI Values (0.047m)",
-#      xlab="NDVI",
-#      ylab="Frequency",
-#      col="grey",
-#      xlim = c(0,1))
-# 
-# hist(rast_AOI_NDVI_119,
-#      main="Distribution of NDVI Values (0.119m)",
-#      xlab="NDVI",
-#      ylab="Frequency",
-#      col="grey",
-#      xlim = c(0,1))
-# 
-# hist(rast_AOI_NDVI_121,
-#      main="Distribution of NDVI Values (0.121m)",
-#      xlab="NDVI",
-#      ylab="Frequency",
-#      col="grey",
-#      xlim = c(0,1))
 
+png('plots/Monitoring Site CHM histogram.png')
+hist(rast_AOI_CHM,
+     main="Distribution of canopy height Values",
+     xlab="Canopy height (m)",
+     ylab="Frequency",
+     col="grey")
+dev.off()
 
+png('plots/Monitoring Site NDVI 018 histogram.png')
+hist(rast_AOI_NDVI_018,
+     main="Distribution of NDVI Values (0.018m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+dev.off()
 
+png('plots/Monitoring Site NDVI047 histogram.png')
+hist(rast_AOI_NDVI_047,
+     main="Distribution of NDVI Values (0.047m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+dev.off()
 
+png('plots/Monitoring Site NDVI 119 histogram.png')
+hist(rast_AOI_NDVI_119,
+     main="Distribution of NDVI Values (0.119m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+dev.off()
 
+png('plots/Monitoring Site NDVI 121 histogram.png')
+hist(rast_AOI_NDVI_121,
+     main="Distribution of NDVI Values (0.121m)",
+     xlab="NDVI",
+     ylab="Frequency",
+     col="grey",
+     xlim = c(0,1))
+dev.off()
 
 
 
@@ -3269,39 +3259,56 @@ meanCH <- exact_extract(rast_AOI_CHM, AOI, 'mean')                              
 
 # calculate biomass maps (units in g m^2 per pixel, to facilitate comparison between different spatial grain products)
 # Use standard error or model coefficients to propogate some of the uncertanty in biomass estimate
+# CHM 0.01 m
 rast_Biomass_CHM <- rast_AOI_CHM * model_SfM$coefficients[1] 
 rast_Biomass_CHM_upper <- rast_AOI_CHM * (model_SfM$coefficients[1] + coef(summary(model_SfM))[, "Std. Error"])
 rast_Biomass_CHM_lower <- rast_AOI_CHM * (model_SfM$coefficients[1] - coef(summary(model_SfM))[, "Std. Error"])
 
+# NDVI 0.018 m
 rast_Biomass_NDVI_018 <- coef(exp_model_total_NDVI_018)[1] * exp(coef(exp_model_total_NDVI_018)[2] * rast_AOI_NDVI_018)
 rast_Biomass_NDVI_018_upper <- (coef(exp_model_total_NDVI_018)[1] + coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][1]
 ) * (exp(coef(exp_model_total_NDVI_018)[2] + coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][2])
- * rast_AOI_NDVI_018)
+     * rast_AOI_NDVI_018)
 rast_Biomass_NDVI_018_lower <- (coef(exp_model_total_NDVI_018)[1] - coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][1]
 ) * (exp(coef(exp_model_total_NDVI_018)[2] - coef(summary(exp_model_total_NDVI_018))[, "Std. Error"][2])
      * rast_AOI_NDVI_018)
 
-
-
+# NDVI 0.047 m
 rast_Biomass_NDVI_047 <- coef(exp_model_total_NDVI_047)[1] * exp(coef(exp_model_total_NDVI_047)[2] * rast_AOI_NDVI_047)
+rast_Biomass_NDVI_047_upper <- (coef(exp_model_total_NDVI_047)[1] + coef(summary(exp_model_total_NDVI_047))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_047)[2] + coef(summary(exp_model_total_NDVI_047))[, "Std. Error"][2])
+     * rast_AOI_NDVI_047)
+rast_Biomass_NDVI_047_lower <- (coef(exp_model_total_NDVI_047)[1] - coef(summary(exp_model_total_NDVI_047))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_047)[2] - coef(summary(exp_model_total_NDVI_047))[, "Std. Error"][2])
+     * rast_AOI_NDVI_047)
+
+# NDVI 0.119 m
 rast_Biomass_NDVI_119 <- coef(exp_model_total_NDVI_119)[1] * exp(coef(exp_model_total_NDVI_119)[2] * rast_AOI_NDVI_119)
+rast_Biomass_NDVI_119_upper <- (coef(exp_model_total_NDVI_119)[1] + coef(summary(exp_model_total_NDVI_119))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_119)[2] + coef(summary(exp_model_total_NDVI_119))[, "Std. Error"][2])
+     * rast_AOI_NDVI_119)
+rast_Biomass_NDVI_119_lower <- (coef(exp_model_total_NDVI_119)[1] - coef(summary(exp_model_total_NDVI_119))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_119)[2] - coef(summary(exp_model_total_NDVI_119))[, "Std. Error"][2])
+     * rast_AOI_NDVI_119)
+
+# NDVI 0.121 m
 rast_Biomass_NDVI_121 <- coef(exp_model_total_NDVI_121)[1] * exp(coef(exp_model_total_NDVI_121)[2] * rast_AOI_NDVI_121)
+rast_Biomass_NDVI_121_upper <- (coef(exp_model_total_NDVI_121)[1] + coef(summary(exp_model_total_NDVI_121))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_121)[2] + coef(summary(exp_model_total_NDVI_121))[, "Std. Error"][2])
+     * rast_AOI_NDVI_121)
+rast_Biomass_NDVI_121_lower <- (coef(exp_model_total_NDVI_121)[1] - coef(summary(exp_model_total_NDVI_121))[, "Std. Error"][1]
+) * (exp(coef(exp_model_total_NDVI_121)[2] - coef(summary(exp_model_total_NDVI_121))[, "Std. Error"][2])
+     * rast_AOI_NDVI_121)
 
 
 # Calculate total biomass in each raster
+# To convert g m-2 to Mg ha-1, divide by 100.
 Biomass_CHM_gm2 <- 
   round(cellStats(rast_Biomass_CHM, 'sum') / ncell(rast_Biomass_CHM), 1)                  # mean biomass in g m-2
 Biomass_CHM_gm2_upper <- 
   round(cellStats(rast_Biomass_CHM_upper, 'sum') / ncell(rast_Biomass_CHM_upper), 1)                  # mean biomass in g m-2
 Biomass_CHM_gm2_lower <- 
   round(cellStats(rast_Biomass_CHM_lower, 'sum') / ncell(rast_Biomass_CHM_lower), 1)                  # mean biomass in g m-2
-
-# Biomass_CHM_Mgha <- 
-#   round(cellStats(rast_Biomass_CHM, 'sum') / ncell(rast_Biomass_CHM) / 100, 2)            # mean biomass in Mg ha-1
-# Biomass_CHM_Mgha_upper <- 
-#   round(cellStats(rast_Biomass_CHM_upper, 'sum') / ncell(rast_Biomass_CHM_upper) / 100, 2)            # mean biomass in Mg ha-1
-# Biomass_CHM_Mgha_lower <- 
-#   round(cellStats(rast_Biomass_CHM_lower, 'sum') / ncell(rast_Biomass_CHM_lower) / 100, 2)            # mean biomass in Mg ha-1
 
 Biomass_NDVI_018_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_018, 'sum') / ncell(rast_Biomass_NDVI_018), 1)        # mean biomass in g m-2
@@ -3310,26 +3317,26 @@ Biomass_NDVI_018_gm2_upper <-
 Biomass_NDVI_018_gm2_lower <- 
   round(cellStats(rast_Biomass_NDVI_018_lower, 'sum') / ncell(rast_Biomass_NDVI_018_lower), 1)        # mean biomass in g m-2
 
-
-# Biomass_NDVI_018_Mgha <- 
-#   round(cellStats(rast_Biomass_NDVI_018, 'sum') / ncell(rast_Biomass_NDVI_018) / 100, 2)  # mean biomass in Mg ha-1
-
 Biomass_NDVI_047_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_047, 'sum') / ncell(rast_Biomass_NDVI_047), 1)        # mean biomass in g m-2
-Biomass_NDVI_047_Mgha <- 
-  round(cellStats(rast_Biomass_NDVI_047, 'sum') / ncell(rast_Biomass_NDVI_047) / 100, 2)  # mean biomass in Mg ha-1
+Biomass_NDVI_047_gm2_upper <- 
+  round(cellStats(rast_Biomass_NDVI_047_upper, 'sum') / ncell(rast_Biomass_NDVI_047), 1)        # mean biomass in g m-2
+Biomass_NDVI_047_gm2_lower <- 
+  round(cellStats(rast_Biomass_NDVI_047_lower, 'sum') / ncell(rast_Biomass_NDVI_047), 1)        # mean biomass in g m-2
 
 Biomass_NDVI_119_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_119, 'sum') / ncell(rast_Biomass_NDVI_119), 1)        # mean biomass in g m-2
-Biomass_NDVI_119_Mgha <- 
-  round(cellStats(rast_Biomass_NDVI_119, 'sum') / ncell(rast_Biomass_NDVI_119) / 100, 2)  # mean biomass in Mg ha-1
+Biomass_NDVI_119_gm2_upper <- 
+  round(cellStats(rast_Biomass_NDVI_119_upper, 'sum') / ncell(rast_Biomass_NDVI_119), 1)        # mean biomass in g m-2
+Biomass_NDVI_119_gm2_lower <- 
+  round(cellStats(rast_Biomass_NDVI_119_lower, 'sum') / ncell(rast_Biomass_NDVI_119), 1)        # mean biomass in g m-2
 
 Biomass_NDVI_121_gm2 <- 
   round(cellStats(rast_Biomass_NDVI_121, 'sum') / ncell(rast_Biomass_NDVI_121), 1)        # mean biomass in g m-2
-Biomass_NDVI_121_Mgha <- 
-  round(cellStats(rast_Biomass_NDVI_121, 'sum') / ncell(rast_Biomass_NDVI_121) / 100, 2)  # mean biomass in Mg ha-1
-
-
+Biomass_NDVI_121_gm2_upper <- 
+  round(cellStats(rast_Biomass_NDVI_121_upper, 'sum') / ncell(rast_Biomass_NDVI_121), 1)        # mean biomass in g m-2
+Biomass_NDVI_121_gm2_lower <- 
+  round(cellStats(rast_Biomass_NDVI_121_lower, 'sum') / ncell(rast_Biomass_NDVI_121), 1)        # mean biomass in g m-2
 
 
 # create dataframe of total biomass estimates
@@ -3338,20 +3345,27 @@ df_biomass_est <- data.frame("Raster" = c("CHM",
                                           "NDVI 0.047 m",
                                           "NDVI 0.119 m",
                                           "NDVI 0.121 m"),
-                             "Biomass_Mg_ha1" = c(Biomass_CHM_Mgha,
-                                                  Biomass_NDVI_018_Mgha,
-                                                  Biomass_NDVI_047_Mgha,
-                                                  Biomass_NDVI_119_Mgha,
-                                                  Biomass_NDVI_121_Mgha),
                              "Biomass_g_m2" = c(Biomass_CHM_gm2,
                                                 Biomass_NDVI_018_gm2,
                                                 Biomass_NDVI_047_gm2,
                                                 Biomass_NDVI_119_gm2, 
-                                                Biomass_NDVI_121_gm2)
+                                                Biomass_NDVI_121_gm2),
+                             "Biomass_lower_g_m2" = c(Biomass_CHM_gm2_lower,
+                                                Biomass_NDVI_018_gm2_lower,
+                                                Biomass_NDVI_047_gm2_lower,
+                                                Biomass_NDVI_119_gm2_lower, 
+                                                Biomass_NDVI_121_gm2_lower),
+                             "Biomass_upper)g_m2" = c(Biomass_CHM_gm2_upper,
+                                                Biomass_NDVI_018_gm2_upper,
+                                                Biomass_NDVI_047_gm2_upper,
+                                                Biomass_NDVI_119_gm2_upper, 
+                                                Biomass_NDVI_121_gm2_upper)
                              )
+
 
 # Export total biomass estimates
 write.csv(df_biomass_est,"tables/Table 3 Biomass estimates.csv", row.names = FALSE)            # extracted NDVI values were added to the main_database file. ndvi_data <- read.csv("data/Extracted_NDVI.csv", header = T)                  # Read in NDVI values from Exact Extract pipeline.
+
 
 ## write clipped rasters to faciliate sharing
 # writeRaster(rast_AOI_CHM, "data/site_rasters/rast_AOI_CHM.tif")
@@ -3400,10 +3414,10 @@ lapply(raster_names, function(x) sprintf("%.10f",extent(get(x))@ymax))
 # re-sampling, but can't easily be avoided. (looking at those differences, we
 # could also just re-sample to 0.2 m, but let's stick to the 0.25 m planned).
 # Ceate an empty target raster with the desired properties and then resample to that. 
-target_raster <- raster(xmn = 581926.75,
-                        xmx = 582040.50,
-                        ymn = 7719550.50,
-                        ymx = 7719597.00,
+target_raster <- raster(xmn = 581928,
+                        xmx = 582040,
+                        ymn = 7719555,
+                        ymx = 7719600,
                         crs = crs(rast_AOI_CHM),
                         res = 0.25)
 
@@ -3468,10 +3482,7 @@ par(mfrow = c(1, 1))
 # Most people use the rasterVis package which uses lattice plots that can be arranged into multiple grobs with gridExtra
 # This can all be nicely done with levelplot from the rasterVis package
 
-# TEMP ----
-# install.packages('Unicode')
-# library(Unicode)
- 
+
 
 # Create dataframe of rasters to plot
 rasters_to_plot <- data.frame(
@@ -3592,15 +3603,18 @@ plot_pretty_raster <- function(raster_name) {
         xs <- seq(scale_bar_xmin, scale_bar_xmax, scale_bar_step)
         grid.rect(x = xs[1:(length(xs)-1)],
                   y = scale_bar_ymin,
-                  width = scale_bar_step, height=scale_bar_height,
-                  gp= gpar(fill = rep(c('transparent', "white"),
+                  # width = scale_bar_step, height=scale_bar_height,
+                  width = scale_bar_length, height=scale_bar_height,
+                  # gp= gpar(fill = rep(c('transparent', "white"),
+                  gp= gpar(fill = rep(c('white', "white"),
                                       2),
                            col = "white"),
                   default.units='native')
         grid.text(x = xs - (scale_bar_step / 2), 
                   y = scale_bar_ymin + scale_bar_height * 1.5,
+                  # paste(seq(0, scale_bar_length, scale_bar_step), "m"),
                   paste(seq(0, scale_bar_length, scale_bar_step), "m"),
-                  gp=gpar(cex=0.8, col = "white"),
+                  gp=gpar(cex=1.5, col = "white"),
                   default.units='native')
       }, data = list(raster_name = raster_name,
                      raster_to_plot = raster_to_plot)) # + 
