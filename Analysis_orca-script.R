@@ -2974,7 +2974,7 @@ ggsave(
 
 
 
-# SI Figure of plant functional groups across the 36 plots ----
+# Figure S2 - Taxanomic abundence of plant functional groups ----
 # Calculate percentage cover of different veg covers per plot
 PF_observations3 <- PF_observations %>%
   drop_na(Count) %>%
@@ -3037,7 +3037,7 @@ ggsave(
 
 
 
-### SI figure of biomass components ----
+### Figure S3 - Biomass components ----
 # prepare data
 df_biomass <- data.frame("plotID" = rep(dataset$PlotID,3),
                          "biomass" = c((dataset$Comp1_Mass*4), (dataset$Comp2_Mass*4), (dataset$Comp3_Mass*4)),
@@ -3082,7 +3082,7 @@ ggsave(
 
 
 
-### SI Figure of terrain model error ----
+### Figure S7. Terrain model accuracy assessment ----
 # prepare data
 DTM_accuracy$z_error <- DTM_accuracy$DTM_elevation - DTM_accuracy$GNSS_elevation
 
@@ -3107,8 +3107,8 @@ DTM_error_SD <- round(sd(DTM_accuracy$z_error), 3)
 ggsave(
   plot_terrain_error,
   filename = "plots/Figure S7 - DTM error.png",
-  width = 16,
-  height = 18,
+  width = 12,
+  height = 12,
   units = "cm"
 )
 
@@ -3468,6 +3468,11 @@ par(mfrow = c(1, 1))
 # Most people use the rasterVis package which uses lattice plots that can be arranged into multiple grobs with gridExtra
 # This can all be nicely done with levelplot from the rasterVis package
 
+# TEMP ----
+# install.packages('Unicode')
+# library(Unicode)
+ 
+
 # Create dataframe of rasters to plot
 rasters_to_plot <- data.frame(
   raster_name = c("rast_AOI_CHM",
@@ -3559,8 +3564,7 @@ plot_pretty_raster <- function(raster_name) {
                              scales=list(draw=FALSE), # suppress axis labels
                              col.regions=as.character(levels(cols)),
                              colorkey=FALSE,
-                             xlab.top = list("ffadsf", col = "white", cex = 0.8), # Quick work around to make sure spacing is the same
-                             #xlab = list("dfsafasdf", col = "white", cex = 1), # Quick work around to make sure spacing is the same
+                             xlab.top = list("ffadsf", col = "white", cex = 1), # Quick work around to make sure spacing is the same
                              ylab.right = list("sdfsfa", col = "white", cex = 6.75) # This is a quick work around to replace the color key bar...
                              ) + 
       # Add scale bar
@@ -3568,7 +3572,7 @@ plot_pretty_raster <- function(raster_name) {
         ## Scale bar
         # Determine position of scale bar (bottom left corner)
         scale_bar_length <- 20 # Scale bar length 20 m
-        scale_bar_height <- 2.5 # scale bar height 2.5 m (seeme like a good start for 50 m height raster)
+        scale_bar_height <- 3 # scale bar height 3 m
         scale_bar_nsegments <- 2 # 4 segments
         scale_bar_xpos <- 10 # x position from bottom left corner in percent
         scale_bar_ypos <- 10 # y position from bottom left corner in percent
@@ -3626,7 +3630,7 @@ plot_pretty_raster <- function(raster_name) {
                                labels=list(at=seq(col_scale_min,
                                                   col_scale_max,
                                                   col_scale_step), 
-                                           font=1, cex = 1)  # Colorkey axis text
+                                           font=1, cex = 1.5)  # Colorkey axis text
                              ),    
                              legend=list(
                                top=list(
@@ -3634,7 +3638,7 @@ plot_pretty_raster <- function(raster_name) {
                                    parse(text = col_key_label),
                                    y=1.1, 
                                    x=1.07),
-                                 cex = 1)),
+                                 cex = 2)),
                              scales=list(draw=FALSE),            # suppress axis labels
                              col.regions=col_ramp,                   # colour ramp
                              at=seq(col_scale_min, col_scale_max, length.out = 100))
@@ -3648,7 +3652,7 @@ plot_pretty_raster <- function(raster_name) {
                                         y   = unit(0, "npc"), 
                                         just=c("left","top"),
                                         gp=gpar(col="black", 
-                                                fontsize=18, 
+                                                fontsize=20, 
                                                 fontfamily="Arial")))
   return(pretty_plot_with_label)
 }
