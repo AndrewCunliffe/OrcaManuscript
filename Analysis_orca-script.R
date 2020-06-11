@@ -190,7 +190,7 @@ dataset$phytomass <-
 
 # Create long form dataset for plotting canopy heights in SI
 PlotID <- rep(dataset$PlotID, times = 2)
-method <- rep(c('SfM', 'Point Framing'), each = 36)
+method <- rep(c('SfM', 'Point Intercept'), each = 36)
 min <- c(dataset$HAG_plotmin_of_cellmax_m, dataset$PF_HAG_min)
 lower <-
   c(dataset$HAG_plot25percentile_of_cellmax_m,
@@ -3143,114 +3143,6 @@ rast_AOI_RGB <- crop(rast_RGB, AOI)
 # rast_AOI_NDVI_119 <- raster("data/site_rasters/rast_AOI_NDVI_119.tif")
 # rast_AOI_NDVI_121<- raster("data/site_rasters/rast_AOI_NDVI_121.tif")
 
-# Review value distributions
-
-png('plots/Monitoring Site CHM histogram.png')
-hist(rast_AOI_CHM,
-     main="Distribution of canopy height Values",
-     xlab="Canopy height (m)",
-     ylab="Frequency",
-     col="grey")
-dev.off()
-
-png('plots/Monitoring Site NDVI 018 histogram.png')
-hist(rast_AOI_NDVI_018,
-     main="Distribution of NDVI Values (0.018m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
-dev.off()
-
-png('plots/Monitoring Site NDVI047 histogram.png')
-hist(rast_AOI_NDVI_047,
-     main="Distribution of NDVI Values (0.047m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
-dev.off()
-
-png('plots/Monitoring Site NDVI 119 histogram.png')
-hist(rast_AOI_NDVI_119,
-     main="Distribution of NDVI Values (0.119m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
-dev.off()
-
-png('plots/Monitoring Site NDVI 121 histogram.png')
-hist(rast_AOI_NDVI_121,
-     main="Distribution of NDVI Values (0.121m)",
-     xlab="NDVI",
-     ylab="Frequency",
-     col="grey",
-     xlim = c(0,1))
-dev.off()
-
-
-
-### Review value distributions in our two samples (harvest plots and monitoring plot)
-## CHM
-
-density(rast_AOI_CHM, main="CHM (m)", col="blue", xlab='Canopy Height (m)', plot=TRUE)
-
-# query all of the  (SFM) canopy heights sampled in all plots
-
-feature_filename <- paste0(home, "data/20160725_AC_ORC - formated for exact extractr.geojson")
-plots <- st_read(feature_filename, crs = 32607)                               # Import geoJSON as sf object, using st_read to allow the non-standard CRS to be specified.
-
-# Extract vector of values for each harvest plot
-# vector_plot_CHM <- raster::extract(rast_CHM, plots)  # Extract is very slow
-# vector_plot_CHM <- exact_extract(rast_CHM, plots)  # Fast
-# 
-# 
-# ggdensity(vector_plot_CHM)
-# 
-# density(vector_plot_CHM, main="CHM", col="blue", xlab='', plot=TRUE)
-# 
-# str(vector_plot_CHM)
-# 
-# plot(rast_plot_CHM)
-# 
-# names(rast_plot_CHM)
-
-
-
-
-# will thie return a vector of vlaues?
-
-
-str(test_exactextract)
-
-#   # Calculate mean NDVI for each polygon
-#   plots$mean_NDVI_018 <- exact_extract(raster_018, plots, 'mean')
-#   plots$mean_NDVI_047 <- exact_extract(raster_047, plots, 'mean')
-#   plots$mean_NDVI_119 <- exact_extract(raster_119, plots, 'mean')
-#   plots$mean_NDVI_121 <- exact_extract(raster_121, plots, 'mean')
-#
-#   # Tidy dataframe
-#   plots_df <- st_drop_geometry(plots)                                           # Create dataframe from simple features object (dropping geometry).
-#   plots_df$EPSG <- NULL                                                         # Remove unecessary EPSG column from dataframe.
-#   plots_df <- plots_df[order(plots_df$PlotID),]                                 # Order dataframe by PlotID.
-#
-#   # Export NDVI values
-#   write.csv(plots_df,"data/Extracted_NDVI.csv", row.names = FALSE)            # extracted NDVI values were added to the main_database file. ndvi_data <- read.csv("data/Extracted_NDVI.csv", header = T)                  # Read in NDVI values from Exact Extract pipeline.
-
-
-
-# Density plot
-density(rast_AOI_NDVI_018, main="NDVI 0.018", col="blue", xlab='NDVI', plot=TRUE)
-density(rast_AOI_NDVI_047, main="NDVI 0.047", col="blue", xlab='NDVI', plot=TRUE)
-density(rast_AOI_NDVI_119, main="NDVI 0.191", col="blue", xlab='NDVI', plot=TRUE)
-density(rast_AOI_NDVI_121, main="NDVI 0.121", col="blue", xlab='NDVI', plot=TRUE)
-
-
-rasterVis::densityplot(rast_AOI_NDVI_018, xlab='NDVI')
-
-
-
 
 
 # compute mean canopy height
@@ -3442,7 +3334,7 @@ list2env(
 # levelplot(rast_Biomass_NDVI_018_coarse)
 # levelplot(rast_Biomass_NDVI_018_coarse_diff)
 
-png("plots/Figure S8.png")
+png("plots/Figure S9.png")
 par(mfrow = c(2, 2)) 
 
 hist(rast_Biomass_NDVI_018_coarse_diff,
@@ -3687,6 +3579,250 @@ dev.off()
 
 
 
+### Density plots to compare sample values ----
+## Aiming to compare the distributions of canopy height and NDVI values from the
+## harvest plots and the monitoring area for each of the five raster products.
+
+### Sample raster values ###
+
+sample_size <- 330000 # Number of values to sample across the monitoring area
+
+# Sample values from Canopy heights
+CHM_vals <- bind_rows(c(list(
+  data.frame(
+    area = "Monitoring_Site",
+    group = "Monitoring_Site",
+    CanopyHeight = sampleRandom(rast_AOI_CHM, sample_size, na.rm = T))),
+  lapply(plots$PlotID,
+         function(PlotID) {
+           data.frame(
+             area = PlotID,
+             group = "Harvest_Plots",
+             CanopyHeight = unlist(exact_extract(rast_CHM, 
+                                         plots[plots$PlotID == PlotID,]), 
+                           recursive = F)$value)
+         })
+))
+
+# Sample values from NDVI 121 raster
+NDVI_vals_121 <- bind_rows(c(list(
+  data.frame(
+    area = "Monitoring_Site",
+    group = "Monitoring_Site",
+    NDVI = sampleRandom(rast_AOI_NDVI_121, sample_size, na.rm = T))),
+  lapply(plots$PlotID,
+         function(PlotID) {
+           data.frame(
+             area = PlotID,
+             group = "Harvest_Plots",
+             NDVI = unlist(exact_extract(rast_NDVI_121, 
+                                         plots[plots$PlotID == PlotID,]), 
+                           recursive = F)$value)
+         })
+))
+
+# Sample values from NDVI 119 raster
+NDVI_vals_119 <- bind_rows(c(list(
+  data.frame(
+    area = "Monitoring_Site",
+    group = "Monitoring_Site",
+    NDVI = sampleRandom(rast_AOI_NDVI_119, sample_size, na.rm = T))),
+  lapply(plots$PlotID, 
+         function(PlotID) {
+           data.frame(
+             area = PlotID,
+             group = "Harvest_Plots",
+             NDVI = unlist(exact_extract(rast_NDVI_119, 
+                                         plots[plots$PlotID == PlotID,]), 
+                           recursive = F)$value)
+         })
+))
+
+# Sample values from NDVI 047 raster
+NDVI_vals_047 <- bind_rows(c(list(
+  data.frame(
+    area = "Monitoring_Site",
+    group = "Monitoring_Site",
+    NDVI = sampleRandom(rast_AOI_NDVI_047, sample_size, na.rm = T))),
+  lapply(plots$PlotID,
+         function(PlotID) {
+           data.frame(
+             area = PlotID,
+             group = "Harvest_Plots",
+             NDVI = unlist(exact_extract(rast_NDVI_047, 
+                                         plots[plots$PlotID == PlotID,]), 
+                           recursive = F)$value)
+         })
+))
+
+# Sample values from NDVI 018 raster
+NDVI_vals_018 <- bind_rows(c(list(
+  data.frame(
+    area = "Monitoring_Site",
+    group = "Monitoring_Site",
+    NDVI = sampleRandom(rast_AOI_NDVI_018, sample_size, na.rm = T))),
+  lapply(plots$PlotID,
+         function(PlotID) {
+           data.frame(
+             area = PlotID,
+             group = "Harvest_Plots",
+             NDVI = unlist(exact_extract(rast_NDVI_018, 
+                                         plots[plots$PlotID == PlotID,]), 
+                           recursive = F)$value)
+         })
+))
+
+
+
+
+### Plot density of sample values
+# Pooling all values from harvest plots
+density_CHM <- ggplot(CHM_vals, aes(x = CanopyHeight, group = group, colour = group)) +
+  geom_density() +
+  theme_fancy() +
+  labs(
+    x = expression("Canopy height (m)"),
+    y = expression("Density"),
+    title = "Canopy Heights"
+  ) +
+  # theme(legend.title = element_blank())
+  theme(legend.position = "none")
+
+density_NDVI_121 <- ggplot(NDVI_vals_121, aes(x = NDVI, group = group, colour = group)) +
+  geom_density() +
+  theme_fancy() +
+  labs(
+    x = expression("NDVI"),
+    y = expression("Density"),
+    title = "NVDI (0.121 m)"
+  ) +
+  # theme(legend.title = element_blank())
+  theme(legend.position = "none")
+
+density_NDVI_119 <- ggplot(NDVI_vals_119, aes(x = NDVI, group = group, colour = group)) +
+  geom_density() +
+  theme_fancy() +
+  labs(
+    x = expression("NDVI"),
+    y = expression("Density"),
+    title = "NVDI (0.119 m)"
+  ) +
+  # theme(legend.title = element_blank())
+  theme(legend.position = "none")
+
+density_NDVI_047 <- ggplot(NDVI_vals_047, aes(x = NDVI, group = group, colour = group)) +
+  geom_density() +
+  theme_fancy() +
+  labs(
+    x = expression("NDVI"),
+    y = expression("Density"),
+    title = "NVDI (0.047 m)"
+  ) +
+  # theme(legend.title = element_blank())
+  theme(legend.position = "none")
+
+density_NDVI_018 <- ggplot(NDVI_vals_018, aes(x = NDVI, group = group, colour = group)) +
+  geom_density() +
+  theme_fancy() +
+  labs(
+    x = expression("NDVI"),
+    y = expression("Density"),
+    title = "NVDI (0.018 m)"
+  ) +
+  # theme(legend.title = element_blank())
+  theme(legend.position = "none")
+
+(legend <- ggplot(CHM_vals, aes(x = CanopyHeight, group = group, colour = group)) +
+  geom_density(alpha=0.9) +
+  theme_fancy() +
+    coord_cartesian(
+      xlim = c(2,3),
+      ylim = NULL,
+      expand = TRUE,
+      default = FALSE,
+      clip = "on"
+    ) +
+  labs(
+    x = expression(""),
+    y = expression("")
+  ) +
+theme(
+  text = element_text(family = "Helvetica"),
+  axis.text = element_blank(),
+  axis.title = element_blank(),
+  axis.line.x = element_blank(),
+  axis.line.y = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid.major.x = element_blank(),
+  panel.grid.minor.x = element_blank(),
+  panel.grid.minor.y = element_blank(),
+  panel.grid.major.y = element_blank(),
+  plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
+  legend.text = element_text(size = 10, color = "black"),
+  legend.title = element_blank(),
+  legend.position = c(0.5, 0.5),
+  legend.key.size = unit(0.9, "line")
+  )
+  )
+
+
+# Combine plots with patchwork
+(
+  Figure_density <-
+    density_NDVI_121 + 
+    density_NDVI_119 + 
+    density_NDVI_047 + 
+    density_NDVI_018 + 
+    density_CHM + legend +
+    plot_annotation(
+      tag_levels = 'a',
+      tag_prefix = '(',
+      tag_suffix = ')'
+    )
+)
+
+# Export figure (for final editing to remove unwanted panel label)
+ggsave(
+  Figure_density,
+  filename = "plots/Figure S8 - sample distributions.png",
+  width = 16,
+  height = 20,
+  units = "cm"
+)
+
+
+## Seperatly plotting values from each harvest plot sample
+## Not used
+
+# ggplot(NDVI_vals_121, aes(x = NDVI, group = area, colour = group)) +
+#   geom_density() +
+#   theme_fancy() +
+#   theme(legend.position = "none")
+# 
+# 
+# ggplot(NDVI_vals_119, aes(x = NDVI, group = area, colour = group)) +
+#   geom_density() +
+#   theme_fancy() +
+#   theme(legend.position = "none")
+# 
+# 
+# ggplot(NDVI_vals_047, aes(x = NDVI, group = area, colour = group)) +
+#   geom_density() +
+#   theme_fancy() +
+#   theme(legend.position = "none")
+# 
+# 
+# ggplot(NDVI_vals_018, aes(x = NDVI, group = area, colour = group)) +
+#   geom_density() +
+#   theme_fancy() +
+#   theme(legend.position = "none")
+
+
+
+
+
+
 
 ### Canopy height Vs. NDVI ----
 ## Comparison requires the rasters to have identical extent and spatial resolution
@@ -3704,7 +3840,7 @@ coarse_NDVI_119_height <- (0.38 * exp(8.1635 * coarse_NDVI_119))/100
 coarse_NDVI_121_height <- (0.38 * exp(8.1635 * coarse_NDVI_121))/100
 
 ## Create and Export plots
-png("plots/Figure S9 - Canopy height vs NDVI.png", 
+png("plots/Figure S10 - Canopy height vs NDVI.png", 
     width = 15, height = 15, units = "cm", res = 300)
 par(mfrow=c(2,2))
 plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.05))
@@ -3717,7 +3853,7 @@ dev.off()
 par(mfrow=c(1,1))
 
 ## Create and Export plots
-png("plots/Figure S10 - Canopy height vs canopy height from NDVI.png", 
+png("plots/Figure S11 - Canopy height vs canopy height from NDVI.png", 
     width = 15, height = 15, units = "cm", res = 300)
 par(mfrow=c(2,2))
 plot(coarse_CHM, coarse_NDVI_018_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.018 m", col = alpha("black", 0.05))
