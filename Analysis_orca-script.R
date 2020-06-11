@@ -2174,7 +2174,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    ) +
+    xlim(0.6,0.9) +
+    ylim(-1000,3000)
 )
 
 (
@@ -2222,7 +2224,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-1000,3000)
 )
 
 (
@@ -2270,7 +2274,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-1000,3000)
 )
 
 (
@@ -2318,7 +2324,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-1000,3000)
 )
 
 
@@ -2368,7 +2376,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-250,750)
 )
 
 (
@@ -2416,7 +2426,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-250,750)
 )
 
 (
@@ -2464,7 +2476,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-250,750)
 )
 
 (
@@ -2512,7 +2526,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-250,750)
 )
 
 
@@ -2562,7 +2578,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-50,200)
 )
 
 (
@@ -2610,7 +2628,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-50,200)
 )
 
 (
@@ -2658,7 +2678,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-50,200)
 )
 
 (
@@ -2706,7 +2728,9 @@ preds_leafmass_018 <- ggpredict(mod_leafmass_018, terms = c("mean_NDVI_018", mos
       option = "magma",
       direction = -1,
       end = 0.8
-    )
+    )+
+    xlim(0.6,0.9) +
+    ylim(-50,200)
 )
 
 # Combine plots
@@ -3568,7 +3592,7 @@ pretty_plot_list <- lapply(rasters_to_plot$raster_name,
                        plot_pretty_raster)
 
 # Export PNG for plot grid
-png("plots/Figure 6 Biomass Maps.png", 
+png("plots/Figure 7 Biomass Maps.png", 
     width = 7 * 3,
     height = 3 * 5,
     units = "in",
@@ -3583,9 +3607,16 @@ dev.off()
 ## Aiming to compare the distributions of canopy height and NDVI values from the
 ## harvest plots and the monitoring area for each of the five raster products.
 
+
 ### Sample raster values ###
 
-sample_size <- 330000 # Number of values to sample across the monitoring area
+# Load plots for raster extraction
+plots <- st_read("data/20160725_AC_ORC - formated for exact extractr.geojson", crs = 32607)                               # Import geoJSON as sf object, using st_read to allow the non-standard CRS to be specified.
+
+
+# Set number of values to sample across the monitoring area
+sample_size <- 330000 
+
 
 # Sample values from Canopy heights
 CHM_vals <- bind_rows(c(list(
@@ -3787,14 +3818,14 @@ ggsave(
   Figure_density,
   filename = "plots/Figure S8 - sample distributions.png",
   width = 16,
-  height = 20,
+  height = 16,
   units = "cm"
 )
 
 
 ## Seperatly plotting values from each harvest plot sample
 ## Not used
-
+# 
 # ggplot(NDVI_vals_121, aes(x = NDVI, group = area, colour = group)) +
 #   geom_density() +
 #   theme_fancy() +
@@ -3840,26 +3871,26 @@ coarse_NDVI_119_height <- (0.38 * exp(8.1635 * coarse_NDVI_119))/100
 coarse_NDVI_121_height <- (0.38 * exp(8.1635 * coarse_NDVI_121))/100
 
 ## Create and Export plots
-png("plots/Figure S10 - Canopy height vs NDVI.png", 
+png("plots/Figure 6 - Canopy height vs NDVI.png", 
     width = 15, height = 15, units = "cm", res = 300)
 par(mfrow=c(2,2))
-plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.05))
-plot(coarse_CHM, coarse_NDVI_047, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.047 m", col = alpha("black", 0.05))
-plot(coarse_CHM, coarse_NDVI_119, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.119 m", col = alpha("black", 0.05))
-plot(coarse_CHM, coarse_NDVI_121, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.121 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
+plot(coarse_CHM, coarse_NDVI_047, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.047 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
+plot(coarse_CHM, coarse_NDVI_119, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.119 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
+plot(coarse_CHM, coarse_NDVI_121, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.121 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
 
 dev.off()
 
 par(mfrow=c(1,1))
 
 ## Create and Export plots
-png("plots/Figure S11 - Canopy height vs canopy height from NDVI.png", 
+png("plots/Figure S10 - Canopy height vs canopy height from NDVI.png", 
     width = 15, height = 15, units = "cm", res = 300)
 par(mfrow=c(2,2))
-plot(coarse_CHM, coarse_NDVI_018_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.018 m", col = alpha("black", 0.05))
-plot(coarse_CHM, coarse_NDVI_047_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.047 m", col = alpha("black", 0.05))
-plot(coarse_CHM, coarse_NDVI_119_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.119 m", col = alpha("black", 0.05))
-plot(coarse_CHM, coarse_NDVI_121_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.121 m", col = alpha("black", 0.05))
+plot(coarse_CHM, coarse_NDVI_018_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.018 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
+plot(coarse_CHM, coarse_NDVI_047_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.047 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
+plot(coarse_CHM, coarse_NDVI_119_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.119 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
+plot(coarse_CHM, coarse_NDVI_121_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.121 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
 
 dev.off()
 
