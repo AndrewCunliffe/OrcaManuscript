@@ -3424,36 +3424,36 @@ rasters_to_plot <- data.frame(
                        "biomass",
                        "diff"), 4)),
   col_ramp_title = c("'Canopy Height (m)'",
-                    "'Biomass (g m' ^ -2 * ')'",
+                    "'Biomass (kg m' ^ -2 * ')'",
                     "'none'",
                     rep(c("'NDVI'",
-                          "'Biomass (g m' ^ -2 * ')'",
-                          "'Δ Biomass (g m' ^ -2 * ')'"), 4)),
+                          "'Biomass (kg m' ^ -2 * ')'",
+                          "'Δ Biomass (kg m' ^ -2 * ')'"), 4)), #Δ 
   col_ramp_min = c(0,0,NA, 
-                   rep(c(0,0,-3000), 4)), # Minimum scale values
-  col_ramp_max = c(1.4,3500,NA,
-                   rep(c(1,3500,2000), 4)), # Maximum scale values
-  col_ramp_step = c(0.2,500,NA,
-                    rep(c(0.2,500,1000), 4)), # Color ramp klegend steps
+                   rep(c(0,0,-3.0), 4)), # Minimum scale values
+  col_ramp_max = c(1.5,3.5,NA,
+                   rep(c(1,3.5,2.0), 4)), # Maximum scale values
+  col_ramp_step = c(0.3,0.7,NA,
+                    rep(c(0.2,0.7,1), 4)), # Color ramp klegend steps
   panel_label = paste0("(",
                        letters[1:15],
                        ") ",
-                       c("SfM Canopy Height",
-                         "Biomass SfM",
+                       c("SfM",
+                         "SfM",
                          "RGB",
                          "NDVI (0.018 m)",
-                         "Biomass NDVI (0.018 m)",
-                         "Diff. Biomass CHM - NDVI (0.018 m)",
+                         "NDVI (0.018 m)",
+                         "NDVI (0.018 m)",
                          "NDVI (0.047 m)",
-                         "Biomass NDVI (0.047 m)",
-                         "Diff. Biomass CHM - NDVI (0.047 m)",
+                         "NDVI (0.047 m)",
+                         "NDVI (0.047 m)",
                          "NDVI (0.119 m)",
-                         "Biomass NDVI (0.119 m)",
-                         "Diff. Biomass CHM - NDVI (0.119 m)",
+                         "NDVI (0.119 m)",
+                         "NDVI (0.119 m)",
                          "NDVI (0.121 m)",
-                         "Biomass NDVI (0.121 m)",
-                         "Diff. Biomass CHM - NDVI (0.121 m)")),
-  panel_label_xpos = rep(c(0.07,0.07, 0.06),5),
+                         "NDVI (0.121 m)",
+                         "NDVI (0.121 m)")),
+  panel_label_xpos = rep(c(0.07,0.07, 0.07),5),
   stringsAsFactors = F)
 
 # Generate colour ramps with the colorspace package
@@ -3462,18 +3462,24 @@ ndvi_col <- sequential_hcl(100, palette = "Oranges")
 biomass_col <- sequential_hcl(100, palette = "Greens")
 diff_col <- diverging_hcl(600, palette = "Purple-Brown")[1:500] # Calculate 600 values, only use 500 due to imbalance aorund 0 
 
+# Set common extent amongst rasters
+common_extent <- extent(crop(rast_AOI_NDVI_121, extent(target_raster)))
 
 plot_pretty_raster <- function(raster_name) {
   # Get raster object
   raster_to_plot <- get(raster_name)
+
   # get plot type
   plot_type <- rasters_to_plot$plot_type[rasters_to_plot$raster_name == raster_name]
+
+  # crop all to the same extent
+  raster_to_plot <- crop(raster_to_plot, extent(common_extent))
   
    # If RGB raster do the following
   if(plot_type == "rgb") {
     raster_to_plot <- raster_to_plot[[1:3]]  # throw out alpha band
     # It is huge, so when trying layout changes aggregate to a sensible res first
-    # raster_to_plot <- raster::aggregate(raster_to_plot, 5)
+    raster_to_plot <- raster::aggregate(raster_to_plot, 5)
     # To use lattice (for compatibility with the other raster plots) we
     # need to create the RGB colourspace ourselves.
     
@@ -3491,8 +3497,8 @@ plot_pretty_raster <- function(raster_name) {
                              scales=list(draw=FALSE), # suppress axis labels
                              col.regions=as.character(levels(cols)),
                              colorkey=FALSE,
-                             xlab.top = list("ffadsf", col = "white", cex = 1), # Quick work around to make sure spacing is the same
-                             ylab.right = list("sdfsfa", col = "white", cex = 6.75) # This is a quick work around to replace the color key bar...
+                             xlab.top = list("ffadsf", col = "white", cex = 3), # Quick work around to make sure spacing is the same
+                             ylab.right = list("sdfsfa", col = "white", cex = 7) # This is a quick work around to replace the color key bar...
                              ) + 
       # Add scale bar
       latticeExtra::layer({
@@ -3500,8 +3506,8 @@ plot_pretty_raster <- function(raster_name) {
         # Determine position of scale bar (bottom left corner)
         scale_bar_length <- 20 # Scale bar length 20 m
         scale_bar_height <- 3 # scale bar height 3 m
-        scale_bar_nsegments <- 2 # 4 segments
-        scale_bar_xpos <- 10 # x position from bottom left corner in percent
+        scale_bar_nsegments <- 1 # 1 segment
+        scale_bar_xpos <- 15 # x position from bottom left corner in percent
         scale_bar_ypos <- 10 # y position from bottom left corner in percent
         scale_bar_col <- rasters_to_plot$scale_bar_col[rasters_to_plot$raster_name == raster_name]
         
@@ -3526,10 +3532,11 @@ plot_pretty_raster <- function(raster_name) {
                                       2),
                            col = "white"),
                   default.units='native')
-        grid.text(x = xs - (scale_bar_step / 2), 
-                  y = scale_bar_ymin + scale_bar_height * 1.5,
+        grid.text(#x = xs - (scale_bar_step / 2), 
+                  x = scale_bar_xmin,
+                  y = scale_bar_ymin + scale_bar_height * 1.75,
                   # paste(seq(0, scale_bar_length, scale_bar_step), "m"),
-                  paste(seq(0, scale_bar_length, scale_bar_step), "m"),
+                  paste(scale_bar_length, "m"),
                   gp=gpar(cex=1.5, col = "white"),
                   default.units='native')
       }, data = list(raster_name = raster_name,
@@ -3543,6 +3550,28 @@ plot_pretty_raster <- function(raster_name) {
     #   theme = list(col.regions = "white")
     # }) 
   } else { # else....
+    colorkey_label_xpos <- 1.07
+    colorkey_label_ypos <- 0.75
+    xlab_spacer <- "___"
+    xlab_spacer_size <- 1.25
+    if(plot_type == "chm") {
+      xlab_spacer_size <- 0.9
+      colorkey_label_ypos <- 0.6
+      colorkey_label_xpos <- 0.92
+    } 
+    if(plot_type == "ndvi") {
+      colorkey_label_ypos <- 0.6
+    }
+    if(plot_type == "biomass") {
+      raster_to_plot <- raster_to_plot / 1000
+      colorkey_label_xpos <- 0.95
+      xlab_spacer <- ""
+    } 
+    if(plot_type == "diff") {
+      raster_to_plot <- raster_to_plot / 1000
+      colorkey_label_xpos <- 0.91
+      xlab_spacer <- ""
+    }
     # Set color ramp
     col_ramp <- get(paste0(plot_type, "_col"))
     # Set color key label
@@ -3559,30 +3588,38 @@ plot_pretty_raster <- function(raster_name) {
                                space='right',                   # right
                                labels=list(at=seq(col_scale_min,
                                                   col_scale_max,
-                                                  col_scale_step), 
-                                           font=1, cex = 1.5)  # Colorkey axis text
+                                                  col_scale_step),
+                                           labels=formatC(seq(col_scale_min,
+                                                             col_scale_max,
+                                                             col_scale_step),
+                                                          format = "f",
+                                                          width = 4, 
+                                                          digits = 1),
+                                           font=1, cex = 1.8)  # Colorkey axis text
                              ),    
                              legend=list(
                                top=list(
                                  fun=grid::textGrob(
                                    parse(text = col_key_label),
-                                   y=1.1, 
-                                   x=1.07),
-                                 cex = 2)),
+                                   y=colorkey_label_ypos, 
+                                   x=colorkey_label_xpos,  
+                                   gp = gpar(cex = 2)))
+                                ),
                              scales=list(draw=FALSE),            # suppress axis labels
                              col.regions=col_ramp,                   # colour ramp
-                             at=seq(col_scale_min, col_scale_max, length.out = 100))
+                             at=seq(col_scale_min, col_scale_max, length.out = 100),
+                             xlab.top = list(xlab_spacer, col = "white", cex = xlab_spacer_size))
   }
   # Add label to top left
   panel_label <- rasters_to_plot$panel_label[rasters_to_plot$raster_name == raster_name]
   panel_label_xpos <- rasters_to_plot$panel_label_xpos[rasters_to_plot$raster_name == raster_name]
   pretty_plot_with_label <- arrangeGrob(pretty_plot,
                          top = textGrob(panel_label,
-                                        x = unit(panel_label_xpos, "npc"), 
-                                        y   = unit(0, "npc"), 
+                                        x = unit(panel_label_xpos, "npc"),
+                                        y = unit(-0.5, "npc"),
                                         just=c("left","top"),
-                                        gp=gpar(col="black", 
-                                                fontsize=20, 
+                                        gp=gpar(col="black",
+                                                fontsize=24,
                                                 fontfamily="Arial")))
   return(pretty_plot_with_label)
 }
@@ -3590,10 +3627,9 @@ plot_pretty_raster <- function(raster_name) {
 # Execute for all plots
 pretty_plot_list <- lapply(rasters_to_plot$raster_name,
                        plot_pretty_raster)
-
-# Export PNG for plot grid
+                            # Export PNG for plot grid
 png("plots/Figure 7 Biomass Maps.png", 
-    width = 7 * 3,
+    width = 7.5 * 3,
     height = 3 * 5,
     units = "in",
     res = 300)
