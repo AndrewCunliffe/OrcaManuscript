@@ -803,33 +803,6 @@ exp_models <- list(
   exp_model_leaf_NDVI_018
 )
 
-summary(exp_model_total_NDVI_121)
-
-# Tabulate model parameters
-exp_model_results <- bind_rows(lapply(exp_models, function(model) {
-  model_glance <- broom::glance(model)
-  model_tidy <- broom::tidy(model)
-  return(
-    data.frame(
-      ndvi_grain = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
-      model_form = "Y = a e(b X)",
-      a = paste0(
-        round(model_tidy$estimate[2], 3),
-        " ± ",
-        round(model_tidy$std.error[2], 3)
-      ),
-      b = paste0(
-        round(model_tidy$estimate[1], 3),
-        " ± ",
-        round(model_tidy$std.error[1], 3)
-      ),
-      resid = round(model_glance$sigma, 3),
-      stringsAsFactors = F
-    )
-  )
-}))
-
-
 
 # Tabulate model parameters
 exp_model_results <- bind_rows(lapply(exp_models, function(model) {
@@ -841,14 +814,14 @@ exp_model_results <- bind_rows(lapply(exp_models, function(model) {
       ndvi_grain = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
       model_form = "Y = a e(b X)",
       a = paste0(
-        round(model_tidy$estimate[2], 3),
-        " ± ",
-        round(model_tidy$std.error[2], 3)
-      ),
-      b = paste0(
         round(model_tidy$estimate[1], 3),
         " ± ",
         round(model_tidy$std.error[1], 3)
+      ),
+      b = paste0(
+        round(model_tidy$estimate[2], 3),
+        " ± ",
+        round(model_tidy$std.error[2], 3)
       ),
       RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 1),
       # resid = round(model_glance$sigma, 3),
@@ -1412,14 +1385,14 @@ log_model_results <- bind_rows(lapply(log_models, function(model) {
       ndvi_grain = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
       model_form = "ln(Y) = a X + b",
       a = paste0(
-        round(model_tidy$estimate[2], 3),
-        " ± ",
-        round(model_tidy$std.error[2], 3)
-      ),
-      b = paste0(
         round(model_tidy$estimate[1], 3),
         " ± ",
         round(model_tidy$std.error[1], 3)
+      ),
+      b = paste0(
+        round(model_tidy$estimate[2], 3),
+        " ± ",
+        round(model_tidy$std.error[2], 3)
       ),
       r2 = round(model_glance$r.squared, 2),
       RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 4),
