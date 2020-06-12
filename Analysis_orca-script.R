@@ -375,165 +375,65 @@ summary(model_heights_mixed)
 ggpredict(model_heights_mixed, terms = "Height") %>% plot()
 
 
-# Plot New Figure 2 - using exponential line from below
-(
-  Canopy_heights_mixed_plot <- ggplot(data = dataset,
-                                      aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
-    geom_point(shape = 1, colour = "white") +
-    geom_point(
-      data = height_data,
-      aes(x = Height, y = HAG_plotmean_of_cellmax_m),
-      shape = 1,
-      alpha = 0.2,
-      inherit.aes = FALSE
-    ) +
-    labs(x = "Point Frame - Canopy Height (m)",
-         y = "SfM - Canopy height (m)") +
-    theme_fancy() +
-    coord_cartesian(
-      ylim = c(0, 1),
-      xlim = c(0, 1),
-      expand = FALSE
-    ) +
-    geom_abline(
-      intercept = 0,
-      slope = 1,
-      linetype = "dashed"
-    ) +
-    stat_function(
-      fun = function(x)
-        (coef(summary(model_heights_pow))[, "Estimate"])[1] * (x) ^ (coef(summary(model_heights_pow))[, "Estimate"])[2],
-      aes(),
-      size = 1,
-      lty = "solid",
-      colour = "Black"
-    ) +
-    annotate(
-      "text",
-      x = 0.8,
-      y = 0.1,
-      label = "italic(Y)==1.085~italic(X)^0.715",
-      parse = TRUE,
-      color = "black",
-      size = 3,
-      family = "sans"
-    )
-)
-
-ggsave(
-  Canopy_heights_mixed_plot,
-  filename = "plots/Figure 2 - Canopy Heights - alternative.pdf",
-  width = 10,
-  height = 10,
-  units = "cm"
-)
-
-ggsave(
-  Canopy_heights_mixed_plot,
-  filename = "plots/Figure 2 - Canopy Heights - alternative.png",
-  width = 10,
-  height = 10,
-  units = "cm"
-)
-
 
 # Visualistation (Figure 2)
 # mean point intercept canopy height versus mean structure-from-motion canopy height
 # Create plot
-(
-  Canopy_heights_plot <- ggplot(data = dataset,
-                                aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
-    geom_point(shape = 1) +
-    labs(x = "Point Frame - Canopy Height (m)",
-         y = "SfM - Canopy height (m)") +
-    theme_fancy() +
-    coord_cartesian(
-      ylim = c(0, 1),
-      xlim = c(0, 1),
-      expand = FALSE
-    ) +
-    geom_abline(
-      intercept = 0,
-      slope = 1,
-      linetype = "dashed"
-    ) +
-    stat_poly_eq(
-      aes(label = paste(
-        "atop(", ..eq.label.., ",", ..rr.label.., ")", sep = ""
-      )),
-      formula = y ~ x,
-      na.rm = TRUE,
-      coef.digits = 4,
-      rr.digits = 3,
-      size = 3,
-      parse = TRUE,
-      label.x.npc = 0.90,
-      label.y.npc = 0.10
-    ) +
-    geom_smooth(
-      method = "lm",
-      formula = y ~ x,
-      se = FALSE,
-      size = 0.5,
-      na.rm = TRUE
-    )
-)
-
-
-(
-  Canopy_heights_plot <- ggplot(data = dataset,
-                                aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
-    geom_point(shape = 1) +
-    labs(x = "Point Frame - Canopy Height (m)",
-         y = "SfM - Canopy height (m)") +
-    theme_fancy() +
-    coord_cartesian(
-      ylim = c(0, 1),
-      xlim = c(0, 1),
-      expand = FALSE
-    ) +
-    geom_abline(
-      intercept = 0,
-      slope = 1,
-      linetype = "dashed"
-    ) +
-    stat_function(
-      fun = function(x)
-        (coef(summary(model_heights_pow))[, "Estimate"])[1] * (x) ^ (coef(summary(model_heights_pow))[, "Estimate"])[2],
-      aes(),
-      size = 1,
-      lty = "solid",
-      colour = "Black"
-    ) +
-    annotate(
-      "text",
-      x = 0.8,
-      y = 0.1,
-      label = "italic(Y)==1.085~italic(X)^0.715",
-      parse = TRUE,
-      color = "black",
-      size = 3,
-      family = "sans"
-    )
-)
-
-# Export plot
-ggsave(
-  Canopy_heights_plot,
-  filename = "plots/Figure 2 - Canopy Heights.pdf",
-  width = 10,
-  height = 10,
-  units = "cm"
-)
-
-ggsave(
-  Canopy_heights_plot,
-  filename = "plots/Figure 2 - Canopy Heights.png",
-  width = 10,
-  height = 10,
-  units = "cm"
-)
-
+  (
+    Canopy_heights_plot <- ggplot(data = dataset,
+                                  aes(x = PF_HAG_mean, y = HAG_plotmean_of_cellmax_m)) +
+      geom_point(shape = 1) +
+      labs(x = "Point-Intercept Canopy Height (m)",
+           y = "SfM Canopy height (m)") +
+      theme_fancy() +
+      coord_cartesian(
+        ylim = c(0, 1),
+        xlim = c(0, 1),
+        expand = FALSE
+      ) +
+      geom_abline(
+        intercept = 0,
+        slope = 1,
+        linetype = "dashed"
+      ) +
+      stat_function(
+        fun = function(x)
+          (coef(summary(model_heights_pow))[, "Estimate"])[1] * (x) ^ (coef(summary(model_heights_pow))[, "Estimate"])[2],
+        aes(),
+        size = 1,
+        lty = "solid",
+        colour = "Black"
+      ) +
+      annotate(
+        "text",
+        x = 0.8,
+        y = 0.1,
+        label = "italic(Y)==1.085~italic(X)^0.715",
+        parse = TRUE,
+        color = "black",
+        size = 3,
+        family = "sans"
+      )
+  )
+  
+  # Export plot
+  ggsave(
+    Canopy_heights_plot,
+    filename = "plots/Figure 2 - Canopy Heights.pdf",
+    width = 10,
+    height = 10,
+    units = "cm"
+  )
+  
+  ggsave(
+    Canopy_heights_plot,
+    filename = "plots/Figure 2 - Canopy Heights.png",
+    width = 10,
+    height = 10,
+    units = "cm"
+  )
+  
+  
 
 #### Predictors of biomass (height and NDVI) ----
 # Testing canopy height (from point intercept and photogrammetry) and NDVI as predictors of biomass.
@@ -3061,8 +2961,8 @@ df_biomass <- data.frame("plotID" = rep(dataset$PlotID,3),
    labs(x = "Plot ID\n", 
         y = expression("Dry biomass (g m" ^ "-2" * ")")) +
    theme_fancy() +
-   scale_fill_manual(values = c("#aaeb07", "#2c8232","#755504")) +
-   scale_colour_manual(values = c("#aaeb07", "#2c8232","#755504")) +
+   scale_fill_manual(values = c("#bbde64", "#539657","#735c22")) +
+   scale_colour_manual(values = c("#bbde64", "#539657","#735c22")) +
    theme(legend.position = "bottom",
          legend.title = element_blank(),
          legend.text = element_text(size = 8),
@@ -3849,7 +3749,7 @@ theme(
     )
 )
 
-# Export figure (for final editing to remove unwanted panel label)
+# Export figure (for final editing to remove unwanted '(f)' panel label)
 ggsave(
   Figure_density,
   filename = "plots/Figure S8 - sample distributions.png",
@@ -3934,3 +3834,81 @@ par(mfrow=c(1,1))
 
 
 
+### Fit NDVI-height models ----
+# Extract pairwise pixel values
+CHM_values <- raster::values(coarse_CHM)
+NDVI_018_values <- raster::values(coarse_NDVI_018)
+NDVI_047_values <- raster::values(coarse_NDVI_047)
+NDVI_119_values <- raster::values(coarse_NDVI_119)
+NDVI_121_values <- raster::values(coarse_NDVI_121)
+
+# fit models
+exp_model_NDVI_121_height <-
+  nls(
+    CHM_values ~ a * exp(b * NDVI_121_values),
+    data = dataset,
+    start = list(a = 0.38, b = 8.1),
+    na.action = na.exclude
+  )
+
+exp_model_NDVI_119_height <-
+  nls(
+    CHM_values ~ a * exp(b * NDVI_119_values),
+    data = dataset,
+    start = list(a = 0.38, b = 8.1),
+    na.action = na.exclude
+  )
+
+exp_model_NDVI_047_height <-
+  nls(
+    CHM_values ~ a * exp(b * NDVI_047_values),
+    data = dataset,
+    start = list(a = 0.38, b = 8.1),
+    na.action = na.exclude
+  )
+
+exp_model_NDVI_018_height <-
+  nls(
+    CHM_values ~ a * exp(b * NDVI_018_values),
+    data = dataset,
+    start = list(a = 0.38, b = 8.1),
+    na.action = na.exclude
+  )
+
+
+# Compile model objects
+exp_models2 <- list(
+  exp_model_NDVI_121_height,
+  exp_model_NDVI_119_height,
+  exp_model_NDVI_047_height,
+  exp_model_NDVI_018_height
+)
+
+
+# Tabulate model parameters
+exp_model_results2 <- bind_rows(lapply(exp_models2, function(model) {
+  model_glance <- broom::glance(model)
+  model_tidy <- broom::tidy(model)
+  model_argument <- broom::augment(model)
+  return(
+    data.frame(
+      ndvi_grain = gsub("mean_NDVI_", "0\\.", model_tidy$term[2]),
+      model_form = "Y = a e(b X)",
+      a = paste0(
+        round(model_tidy$estimate[1], 6),
+        " ± ",
+        round(model_tidy$std.error[1], 6)
+      ),
+      b = paste0(
+        round(model_tidy$estimate[2], 6),
+        " ± ",
+        round(model_tidy$std.error[2], 6)
+      ),
+      # resid = round(model_glance$sigma, 4),
+      RMSE = round(sqrt(c(crossprod(model_argument$.resid)) / length(model_argument$.resid)), 3),
+      stringsAsFactors = F
+    )
+  )
+}))
+
+exp_model_results2
