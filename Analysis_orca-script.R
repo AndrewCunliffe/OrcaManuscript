@@ -1374,6 +1374,7 @@ log_models <- list(
   log_model_leaf_NDVI_018
 )
 
+summary(log_model_leaf_NDVI_018)
 
 # Tabulate model parameters
 log_model_results <- bind_rows(lapply(log_models, function(model) {
