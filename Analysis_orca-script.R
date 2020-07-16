@@ -376,7 +376,7 @@ ggpredict(model_heights_mixed, terms = "Height") %>% plot()
 
 
 
-# Visualistation (Figure 2)
+# Figure 2 ----
 # mean point intercept canopy height versus mean structure-from-motion canopy height
 # Create plot
   (
@@ -435,7 +435,7 @@ ggpredict(model_heights_mixed, terms = "Height") %>% plot()
   
   
 
-#### Predictors of biomass (height and NDVI) ----
+#### Predictors of biomass (height and NDVI)
 # Testing canopy height (from point intercept and photogrammetry) and NDVI as predictors of biomass.
 # Analysis
 # Point intercept
@@ -568,8 +568,7 @@ blended <- rbind(model_results1,
 write.csv(blended, file = "tables/Table S1 model fits.csv", row.names = F)
 
 
-# Visualisation
-
+# Figure 3 ----
 # Create plots
 (
   biomass_CH_SfM <- ggplot(
@@ -696,7 +695,7 @@ ggsave(
 )
 
 
-### Analysis of NDVI - biomass relationships ----
+### Analysis of NDVI - biomass relationships
 # Testing relationships between NDVI and various biomass components
 
 ### Exponential models fitted to  biomass values ###
@@ -1406,7 +1405,7 @@ log_model_results <- bind_rows(lapply(log_models, function(model) {
 # Export model parameters to table
 write.csv(log_model_results, file = "tables/Table 2 log model fits.csv", row.names = F)
 
-
+# Figure 4 ----
 # Visualisation
 # Create plots
 # Total biomass
@@ -1895,7 +1894,7 @@ hist(dataset$herb_prop)
 summary(dataset$herb_prop)
 
 
-### Figure 6. Analysis of moss cover effect on NDVI-biomass relationships ####
+### Analysis of moss cover effect on NDVI-biomass relationships ####
 # Looking at the inteaction between the proportion of moss cover ('moss_prop') with NDVI and Biomass.
 # The coefficient of that interaction effect indicates how moss_prop influences the phytomass/NDVI relationship.
 
@@ -2662,6 +2661,7 @@ ggsave(
 )
 
 
+# Figure 5 ----
 # Combine plots with patchwork
 (
   Figure_5 <-
@@ -3765,7 +3765,7 @@ ggsave(
 
 
 
-### Canopy height Vs. NDVI ----
+### Figure 6. Canopy height Vs. NDVI ----
 ## Comparison requires the rasters to have identical extent and spatial resolution
 ## Resample all rasters to the 0.25 m resolution used for the biomass difference maps
 coarse_CHM <- raster::resample (rast_AOI_CHM, target_raster, method="bilinear")
@@ -3782,25 +3782,26 @@ coarse_NDVI_121_height <- (0.38 * exp(8.1635 * coarse_NDVI_121))/100
 
 ## Create and Export plots
 png("plots/Figure 6 - Canopy height vs NDVI.png", 
-    width = 15, height = 15, units = "cm", res = 300)
+    width = 16, height = 16, units = "cm", res = 300)
 par(mfrow=c(2,2))
-plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
-plot(coarse_CHM, coarse_NDVI_047, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.047 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
-plot(coarse_CHM, coarse_NDVI_119, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.119 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
-plot(coarse_CHM, coarse_NDVI_121, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.121 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9))
+plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
+plot(coarse_CHM, coarse_NDVI_047, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.047 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
+plot(coarse_CHM, coarse_NDVI_119, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.119 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
+plot(coarse_CHM, coarse_NDVI_121, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.121 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
 
 dev.off()
 
 par(mfrow=c(1,1))
 
+
 ## Create and Export plots
 png("plots/Figure S10 - Canopy height vs canopy height from NDVI.png", 
-    width = 15, height = 15, units = "cm", res = 300)
+    width = 16, height = 16, units = "cm", res = 300)
 par(mfrow=c(2,2))
-plot(coarse_CHM, coarse_NDVI_018_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.018 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
-plot(coarse_CHM, coarse_NDVI_047_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.047 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
-plot(coarse_CHM, coarse_NDVI_119_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.119 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
-plot(coarse_CHM, coarse_NDVI_121_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.121 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5))
+plot(coarse_CHM, coarse_NDVI_018_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.018 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5), bty="n", cex.main=1)
+plot(coarse_CHM, coarse_NDVI_047_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.047 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5), bty="n", cex.main=1)
+plot(coarse_CHM, coarse_NDVI_119_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.119 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5), bty="n", cex.main=1)
+plot(coarse_CHM, coarse_NDVI_121_height, xlab="Canopy Height (m)", ylab="Canopy Height from NDVI (m)", main="NDVI 0.121 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0,5), bty="n", cex.main=1)
 
 dev.off()
 
