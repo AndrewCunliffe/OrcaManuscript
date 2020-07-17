@@ -2662,10 +2662,59 @@ ggsave(
 
 
 # Figure 5 ----
+(
+  plot_phytomass_for_fig5 <- ggplot() +
+    geom_line(
+      data = preds_phytomass_121,
+      aes(x = x, y = predicted, colour = group),
+      size = 1
+    ) +
+    geom_ribbon(
+      data = preds_phytomass_121,
+      aes(
+        x = x,
+        ymin = conf.low,
+        ymax = conf.high,
+        fill = group
+      ),
+      alpha = 0.2
+    ) +
+    theme_fancy() +
+    theme(
+      legend.title = element_text(size = 8),
+      legend.text = element_text(size = 6, face = "italic"),
+      legend.key.size = unit(0.9, "line"),
+      legend.background = element_rect(
+        color = "black",
+        fill = "transparent",
+        size = 4,
+        linetype = "blank"
+      ),
+      legend.position = legend_loc
+    ) +
+    labs(
+      x = "Plot mean NDVI (0.121 m)",
+      y = expression("Phytomass (g m" ^ "-2" * ")"),
+      fill = "Moss cover",
+      colour = "Moss cover"
+    ) +
+    scale_colour_viridis_d(
+      option = "magma",
+      direction = -1,
+      end = 0.8
+    ) +
+    scale_fill_viridis_d(
+      option = "magma",
+      direction = -1,
+      end = 0.8
+    )+
+    xlim(0.65,0.81) +
+    ylim(-250,750)
+)
 # Combine plots with patchwork
 (
   Figure_5 <-
-    leafmass_biomass + phytomass_biomass + plot_phytomass_121 +
+    leafmass_biomass + phytomass_biomass + plot_phytomass_for_fig5 +
     plot_annotation(
       tag_levels = 'a',
       tag_prefix = '(',
@@ -3781,17 +3830,108 @@ coarse_NDVI_119_height <- (0.38 * exp(8.1635 * coarse_NDVI_119))/100
 coarse_NDVI_121_height <- (0.38 * exp(8.1635 * coarse_NDVI_121))/100
 
 ## Create and Export plots
-png("plots/Figure 6 - Canopy height vs NDVI.png", 
-    width = 16, height = 16, units = "cm", res = 300)
-par(mfrow=c(2,2))
-plot(coarse_CHM, coarse_NDVI_018, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.018 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
-plot(coarse_CHM, coarse_NDVI_047, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.047 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
-plot(coarse_CHM, coarse_NDVI_119, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.119 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
-plot(coarse_CHM, coarse_NDVI_121, xlab="Canopy Height (m)", ylab="NDVI", main="NDVI 0.121 m", col = alpha("black", 0.03), xlim=c(0,1.2), ylim=c(0.3,0.9), bty="n", cex.main=1)
+## Extracted values from rasters
+coarse_CHM_values <- values(coarse_CHM)
+coarse_NDVI_018_values <- values(coarse_NDVI_018)
+coarse_NDVI_047_values <- values(coarse_NDVI_047)
+coarse_NDVI_119_values <- values(coarse_NDVI_119)
+coarse_NDVI_121_values <- values(coarse_NDVI_121)
 
-dev.off()
+# create dataframe
+df_height_NDVI <- data.frame(coarse_CHM_values, 
+                   coarse_NDVI_018_values,
+                   coarse_NDVI_047_values, 
+                   coarse_NDVI_119_values, 
+                   coarse_NDVI_121_values)
 
-par(mfrow=c(1,1))
+# create plots
+(Figure6a <- ggplot(df_height_NDVI, 
+                    aes(x = coarse_CHM_values,
+                        y = coarse_NDVI_018_values)) +
+    geom_point(shape = ".", alpha=0.09) +
+    labs(x = "Canopy Height (m)",
+         y = "NDVI",
+         title = "NDVI Grain 0.018 m") +
+    coord_cartesian(
+      ylim = c(0.3, 0.9),
+      xlim = c(0, 1.2),
+      expand = FALSE
+    ) +
+    theme_fancy()
+)
+(Figure6b <- ggplot(df_height_NDVI, 
+                    aes(x = coarse_CHM_values,
+                        y = coarse_NDVI_047_values)) +
+    geom_point(shape = ".", alpha=0.09) +
+    labs(x = "Canopy Height (m)",
+         y = "NDVI",
+         title = "NDVI Grain 0.047 m") +
+    coord_cartesian(
+      ylim = c(0.3, 0.9),
+      xlim = c(0, 1.2),
+      expand = FALSE
+    ) +
+    theme_fancy()
+)
+(Figure6c <- ggplot(df_height_NDVI, 
+                    aes(x = coarse_CHM_values,
+                        y = coarse_NDVI_119_values)) +
+    geom_point(shape = ".", alpha=0.09) +
+    labs(x = "Canopy Height (m)",
+         y = "NDVI",
+         title = "NDVI Grain 0.018 m") +
+    coord_cartesian(
+      ylim = c(0.3, 0.9),
+      xlim = c(0, 1.2),
+      expand = FALSE
+    ) +
+    theme_fancy()
+)
+(Figure6d <- ggplot(df_height_NDVI, 
+                    aes(x = coarse_CHM_values,
+                        y = coarse_NDVI_121_values)) +
+    geom_point(shape = ".", alpha=0.09) +
+    labs(x = "Canopy Height (m)",
+         y = "NDVI",
+         title = "NDVI Grain 0.121 m") +
+    coord_cartesian(
+      ylim = c(0.3, 0.9),
+      xlim = c(0, 1.2),
+      expand = FALSE
+    ) +
+    theme_fancy()
+)
+
+# Combine plots with patchwork
+(
+  Figure6 <-
+    Figure6a + Figure6b + Figure6c + Figure6d +
+    plot_annotation(
+      tag_levels = 'a',
+      tag_prefix = '(',
+      tag_suffix = ')'
+    )
+)
+
+
+# save plot
+ggsave(
+  Figure6,
+  filename = "plots/Figure 6 - Canopy height vs NDVI.png",
+  width = 16,
+  height = 12,
+  units = "cm"
+)
+
+ggsave(
+  Figure6,
+  filename = "plots/Figure 6 - Canopy height vs NDVI.pdf",
+  width = 16,
+  height = 12,
+  units = "cm"
+)
+
+
 
 
 ## Create and Export plots
