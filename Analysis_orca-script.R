@@ -3879,7 +3879,7 @@ df_height_NDVI <- data.frame(coarse_CHM_values,
     geom_point(shape = ".", alpha=0.09) +
     labs(x = "Canopy Height (m)",
          y = "NDVI",
-         title = "NDVI Grain 0.018 m") +
+         title = "NDVI Grain 0.119 m") +
     coord_cartesian(
       ylim = c(0.3, 0.9),
       xlim = c(0, 1.2),
